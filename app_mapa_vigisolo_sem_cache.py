@@ -4,15 +4,15 @@ import pandas as pd
 import folium
 from folium.plugins import MarkerCluster
 from streamlit_folium import st_folium
-import calendar
 
 # URL da planilha pública (CSV)
 sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0tNytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv"
 
+# Configuração da página
 st.set_page_config(page_title="Mapa VigiSolo", layout="wide")
 st.title("🗺️ Mapa Áreas Programa VigiSolo ")
 
-# Carregar dados SEM CACHE
+# Função para carregar os dados
 def carregar_dados():
     df = pd.read_csv(sheet_url)
     df[['lat', 'lon']] = df['COORDENADAS'].str.split(', ', expand=True).astype(float)
@@ -28,13 +28,19 @@ col1, col2 = st.columns(2)
 
 anos = sorted(df['ANO'].dropna().unique())
 meses_numeros = sorted(df['MES'].dropna().unique())
-meses_nome = {int(num): calendar.month_abbr[int(num)].capitalize() for num in meses_numeros}
+
+# Meses abreviados em português
+meses_nome = {
+    1: "Jan", 2: "Fev", 3: "Mar", 4: "Abr", 5: "Mai", 6: "Jun",
+    7: "Jul", 8: "Ago", 9: "Set", 10: "Out", 11: "Nov", 12: "Dez"
+}
 
 ano_selecionado = col1.selectbox("Filtrar por ano:", options=["Todos"] + list(anos))
-mes_selecionado_nome = col2.selectbox("Filtrar por mês:", options=["Todos"] + [meses_nome[m] for m in meses_nome])
+mes_selecionado_nome = col2.selectbox("Filtrar por mês:", options=["Todos"] + [meses_nome[m] for m in meses_numeros])
 
 # Aplicar filtros
 df_filtrado = df.copy()
+
 if ano_selecionado != "Todos":
     df_filtrado = df_filtrado[df_filtrado['ANO'] == ano_selecionado]
 

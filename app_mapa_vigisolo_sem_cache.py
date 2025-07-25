@@ -10,7 +10,7 @@ import calendar
 sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0tNytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv"
 
 st.set_page_config(page_title="Mapa VigiSolo", layout="wide")
-st.title("🗺️ Mapa VigiSolo com Filtros por Ano e Mês")
+st.title("🗺️ Mapa Áreas Programa VigiSolo ")
 
 # Carregar dados SEM CACHE
 def carregar_dados():

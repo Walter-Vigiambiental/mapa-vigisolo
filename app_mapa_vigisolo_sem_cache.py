@@ -23,18 +23,29 @@ def carregar_dados():
 df = carregar_dados()
 
 # Filtros
-col1, col2 = st.columns(2)
+st.markdown("### Filtros")
+
+col1, col2, _, _ = st.columns([1, 1, 3, 3])  # colunas com largura proporcional
+
 anos = sorted(df['ANO'].dropna().unique())
 meses_numeros = sorted(df['MES'].dropna().unique())
 
-# Meses em português (nomes completos)
 meses_nome = {
     1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril", 5: "Maio", 6: "Junho",
     7: "Julho", 8: "Agosto", 9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro"
 }
 
-ano_selecionado = col1.selectbox("Filtrar por ano:", options=["Todos"] + list(anos))
-mes_selecionado_nome = col2.selectbox("Filtrar por mês:", options=["Todos"] + [meses_nome[m] for m in meses_numeros])
+with col1:
+    st.markdown("**Ano**", unsafe_allow_html=True)
+    ano_selecionado = st.selectbox(
+        "", options=["Todos"] + list(anos), label_visibility="collapsed"
+    )
+
+with col2:
+    st.markdown("**Mês**", unsafe_allow_html=True)
+    mes_selecionado_nome = st.selectbox(
+        "", options=["Todos"] + [meses_nome[m] for m in meses_numeros], label_visibility="collapsed"
+    )
 
 # Aplicar filtros
 df_filtrado = df.copy()

@@ -81,3 +81,7 @@ if not df_filtrado.empty:
     st_folium(m, width=1000, height=600)
 else:
     st.warning("Nenhum dado encontrado para os filtros selecionados.")
+
+st.markdown("---")
+st.caption("Desenvolvido por Walter Alves usando Streamlit.")
+

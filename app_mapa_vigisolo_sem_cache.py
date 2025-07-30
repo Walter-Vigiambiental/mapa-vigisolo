@@ -64,6 +64,8 @@ if not df_filtrado.empty:
     marker_cluster = MarkerCluster().add_to(m)
 
     for _, row in df_filtrado.iterrows():
+        imagem_html = f'<br><img src="{row["URL_FOTO"]}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
+
         popup_text = (
             f"<strong>Área:</strong> {row['DENOMINAÇÃO DA ÁREA']}<br>"
             f"<strong>Bairro:</strong> {row['BAIRRO']}<br>"
@@ -71,7 +73,9 @@ if not df_filtrado.empty:
             f"<strong>População Exposta:</strong> {row['POPULAÇÃO EXPOSTA']}<br>"
             f"<strong>Data:</strong> {row['DATA'].date()}<br>"
             f"<strong>Coordenadas:</strong> {row['lat']}, {row['lon']}"
+            f"{imagem_html}"
         )
+
         folium.Marker(
             location=[row['lat'], row['lon']],
             popup=folium.Popup(popup_text, max_width=300),
@@ -84,4 +88,5 @@ else:
 
 st.markdown("---")
 st.caption("Desenvolvido por Walter Alves usando Streamlit.")
+
 

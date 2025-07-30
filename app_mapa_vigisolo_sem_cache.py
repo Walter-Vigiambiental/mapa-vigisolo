@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import folium
@@ -84,9 +83,12 @@ if st.session_state.mostrar_mapa and not df_filtrado.empty:
             f"{imagem_html}"
         )
 
+        iframe = folium.IFrame(html=popup_text, width=300, height=300)
+        popup = folium.Popup(iframe, max_width=300)
+
         folium.Marker(
             location=[row['lat'], row['lon']],
-            popup=folium.Popup(popup_text, max_width=300, parse_html=True),
+            popup=popup,
             icon=folium.Icon(color="red", icon="exclamation-sign"),
         ).add_to(marker_cluster)
 

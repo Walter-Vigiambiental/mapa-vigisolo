@@ -37,15 +37,11 @@ meses_nome = {
 
 with col1:
     st.markdown("**Ano**", unsafe_allow_html=True)
-    ano_selecionado = st.selectbox(
-        "", options=["Todos"] + list(anos), label_visibility="collapsed"
-    )
+    ano_selecionado = st.selectbox("", options=["Todos"] + list(anos), label_visibility="collapsed")
 
 with col2:
     st.markdown("**Mês**", unsafe_allow_html=True)
-    mes_selecionado_nome = st.selectbox(
-        "", options=["Todos"] + [meses_nome[m] for m in meses_numeros], label_visibility="collapsed"
-    )
+    mes_selecionado_nome = st.selectbox("", options=["Todos"] + [meses_nome[m] for m in meses_numeros], label_visibility="collapsed")
 
 # Aplicar filtros
 df_filtrado = df.copy()
@@ -63,36 +59,45 @@ if 'mostrar_mapa' not in st.session_state:
 
 if st.button("Gerar Mapa"):
     st.session_state.mostrar_mapa = True
+    st.session_state.mapa = None  # Limpa o mapa salvo anteriormente
 
-# Criar mapa
-if st.session_state.mostrar_mapa and not df_filtrado.empty:
-    map_center = df_filtrado[['lat', 'lon']].mean().tolist()
-    m = folium.Map(location=map_center, zoom_start=12)
-    marker_cluster = MarkerCluster().add_to(m)
+# Criar mapa apenas uma vez
+if st.session_state.mostrar_mapa and 'mapa' not in st.session_state:
+    if not df_filtrado.empty:
+        map_center = df_filtrado[['lat', 'lon']].mean().tolist()
+        m = folium.Map(location=map_center, zoom_start=12)
+        marker_cluster = MarkerCluster().add_to(m)
 
-    for _, row in df_filtrado.iterrows():
-        imagem_html = f'<br><img src="{row["URL_FOTO"]}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
+        for _, row in df_filtrado.iterrows():
+            imagem_html = f'<br><img src="{row["URL_FOTO"]}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
 
-        popup_text = (
-            f"<strong>Área:</strong> {row['DENOMINAÇÃO DA ÁREA']}<br>"
-            f"<strong>Bairro:</strong> {row['BAIRRO']}<br>"
-            f"<strong>Contaminantes:</strong> {row['CONTAMINANTES']}<br>"
-            f"<strong>População Exposta:</strong> {row['POPULAÇÃO EXPOSTA']}<br>"
-            f"<strong>Data:</strong> {row['DATA'].date()}<br>"
-            f"<strong>Coordenadas:</strong> {row['lat']}, {row['lon']}"
-            f"{imagem_html}"
-        )
+            popup_text = (
+                f"<strong>Área:</strong> {row['DENOMINAÇÃO DA ÁREA']}<br>"
+                f"<strong>Bairro:</strong> {row['BAIRRO']}<br>"
+                f"<strong>Contaminantes:</strong> {row['CONTAMINANTES']}<br>"
+                f"<strong>População Exposta:</strong> {row['POPULAÇÃO EXPOSTA']}<br>"
+                f"<strong>Data:</strong> {row['DATA'].date()}<br>"
+                f"<strong>Coordenadas:</strong> {row['lat']}, {row['lon']}"
+                f"{imagem_html}"
+            )
 
-        iframe = folium.IFrame(html=popup_text, width=300, height=300)
-        popup = folium.Popup(iframe, max_width=300)
+            iframe = folium.IFrame(html=popup_text, width=300, height=300)
+            popup = folium.Popup(iframe, max_width=300)
 
-        folium.Marker(
-            location=[row['lat'], row['lon']],
-            popup=popup,
-            icon=folium.Icon(color="red", icon="exclamation-sign"),
-        ).add_to(marker_cluster)
+            folium.Marker(
+                location=[row['lat'], row['lon']],
+                popup=popup,
+                icon=folium.Icon(color="red", icon="exclamation-sign"),
+            ).add_to(marker_cluster)
 
-    st_folium(m, width=1000, height=600)
+        # Armazena o mapa para não recriar
+        st.session_state.mapa = m
+    else:
+        st.session_state.mapa = None
+
+# Mostrar o mapa já armazenado
+if 'mapa' in st.session_state and st.session_state.mapa:
+    st_folium(st.session_state.mapa, width=1000, height=600)
 elif st.session_state.mostrar_mapa:
     st.warning("Nenhum dado encontrado para os filtros selecionados.")
 

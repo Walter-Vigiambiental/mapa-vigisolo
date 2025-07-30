@@ -28,7 +28,6 @@ st.markdown("### Filtros")
 col1, col2 = st.columns(2)
 anos = sorted(df['ANO'].dropna().unique())
 meses_numeros = sorted(df['MES'].dropna().unique())
-
 meses_nome = {
     1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril", 5: "Maio", 6: "Junho",
     7: "Julho", 8: "Agosto", 9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro"
@@ -39,30 +38,24 @@ contaminantes = sorted(df['CONTAMINANTES'].dropna().unique())
 
 with col1:
     ano_selecionado = st.selectbox("Ano", options=["Todos"] + list(anos))
-
 with col2:
     mes_selecionado_nome = st.selectbox("Mês", options=["Todos"] + [meses_nome[m] for m in meses_numeros])
 
 col3, col4 = st.columns(2)
 with col3:
     bairro_selecionado = st.selectbox("Bairro", options=["Todos"] + bairros)
-
 with col4:
     contaminante_selecionado = st.selectbox("Contaminante", options=["Todos"] + contaminantes)
 
 # Aplicar filtros
 df_filtrado = df.copy()
-
 if ano_selecionado != "Todos":
     df_filtrado = df_filtrado[df_filtrado['ANO'] == ano_selecionado]
-
 if mes_selecionado_nome != "Todos":
     mes_num = [num for num, nome in meses_nome.items() if nome == mes_selecionado_nome][0]
     df_filtrado = df_filtrado[df_filtrado['MES'] == mes_num]
-
 if bairro_selecionado != "Todos":
     df_filtrado = df_filtrado[df_filtrado['BAIRRO'] == bairro_selecionado]
-
 if contaminante_selecionado != "Todos":
     df_filtrado = df_filtrado[df_filtrado['CONTAMINANTES'] == contaminante_selecionado]
 
@@ -73,7 +66,7 @@ if 'mostrar_mapa' not in st.session_state:
 if st.button("Gerar Mapa"):
     st.session_state.mostrar_mapa = True
 
-# Gerar mapa
+# Criar mapa
 if st.session_state.mostrar_mapa:
     if not df_filtrado.empty:
         map_center = df_filtrado[['lat', 'lon']].mean().tolist()

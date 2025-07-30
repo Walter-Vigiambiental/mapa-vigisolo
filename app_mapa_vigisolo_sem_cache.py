@@ -92,7 +92,7 @@ if st.session_state.mostrar_mapa and not df_filtrado.empty:
             icon=folium.Icon(color="red", icon="exclamation-sign"),
         ).add_to(marker_cluster)
 
-    st_folium(m, width=1000, height=500, return_clicks=False)
+    st_folium(m, width=1000, height=500)
 elif st.session_state.mostrar_mapa:
     st.warning("Nenhum dado encontrado para os filtros selecionados.")
 

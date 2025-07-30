@@ -59,10 +59,9 @@ if 'mostrar_mapa' not in st.session_state:
 
 if st.button("Gerar Mapa"):
     st.session_state.mostrar_mapa = True
-    st.session_state.mapa = None  # Limpa o mapa salvo anteriormente
 
-# Criar mapa apenas uma vez
-if st.session_state.mostrar_mapa and 'mapa' not in st.session_state:
+# Criar ou atualizar mapa somente se mostrar_mapa for True
+if st.session_state.mostrar_mapa:
     if not df_filtrado.empty:
         map_center = df_filtrado[['lat', 'lon']].mean().tolist()
         m = folium.Map(location=map_center, zoom_start=12)
@@ -90,16 +89,9 @@ if st.session_state.mostrar_mapa and 'mapa' not in st.session_state:
                 icon=folium.Icon(color="red", icon="exclamation-sign"),
             ).add_to(marker_cluster)
 
-        # Armazena o mapa para não recriar
-        st.session_state.mapa = m
+        st_folium(m, width=1000, height=600)
     else:
-        st.session_state.mapa = None
-
-# Mostrar o mapa já armazenado
-if 'mapa' in st.session_state and st.session_state.mapa:
-    st_folium(st.session_state.mapa, width=1000, height=600)
-elif st.session_state.mostrar_mapa:
-    st.warning("Nenhum dado encontrado para os filtros selecionados.")
+        st.warning("Nenhum dado encontrado para os filtros selecionados.")
 
 st.markdown("---")
 st.caption("Desenvolvido por Walter Alves usando Streamlit.")

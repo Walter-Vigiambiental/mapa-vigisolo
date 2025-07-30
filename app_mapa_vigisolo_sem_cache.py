@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import folium
@@ -11,7 +12,8 @@ sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyE
 st.set_page_config(page_title="Mapa VigiSolo", layout="wide")
 st.title("🗺️ Mapa Áreas Programa VigiSolo ")
 
-# Carregar dados
+# Carregar dados com cache
+@st.cache_data
 def carregar_dados():
     df = pd.read_csv(sheet_url)
     df[['lat', 'lon']] = df['COORDENADAS'].str.split(', ', expand=True).astype(float)
@@ -24,8 +26,7 @@ df = carregar_dados()
 
 # Filtros
 st.markdown("### Filtros")
-
-col1, col2, _, _ = st.columns([1, 1, 3, 3])  # colunas com largura proporcional
+col1, col2, _, _ = st.columns([1, 1, 3, 3])
 
 anos = sorted(df['ANO'].dropna().unique())
 meses_numeros = sorted(df['MES'].dropna().unique())
@@ -57,8 +58,15 @@ if mes_selecionado_nome != "Todos":
     mes_num = [num for num, nome in meses_nome.items() if nome == mes_selecionado_nome][0]
     df_filtrado = df_filtrado[df_filtrado['MES'] == mes_num]
 
+# Controle de renderização
+if 'mostrar_mapa' not in st.session_state:
+    st.session_state.mostrar_mapa = False
+
+if st.button("Gerar Mapa"):
+    st.session_state.mostrar_mapa = True
+
 # Criar mapa
-if not df_filtrado.empty:
+if st.session_state.mostrar_mapa and not df_filtrado.empty:
     map_center = df_filtrado[['lat', 'lon']].mean().tolist()
     m = folium.Map(location=map_center, zoom_start=12)
     marker_cluster = MarkerCluster().add_to(m)
@@ -78,15 +86,13 @@ if not df_filtrado.empty:
 
         folium.Marker(
             location=[row['lat'], row['lon']],
-            popup=folium.Popup(popup_text, max_width=300),
+            popup=folium.Popup(popup_text, max_width=300, parse_html=True),
             icon=folium.Icon(color="red", icon="exclamation-sign"),
         ).add_to(marker_cluster)
 
     st_folium(m, width=1000, height=600)
-else:
+elif st.session_state.mostrar_mapa:
     st.warning("Nenhum dado encontrado para os filtros selecionados.")
 
 st.markdown("---")
 st.caption("Desenvolvido por Walter Alves usando Streamlit.")
-
-

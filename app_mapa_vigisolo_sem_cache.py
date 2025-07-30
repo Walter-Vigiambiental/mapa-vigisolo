@@ -9,7 +9,7 @@ sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyE
 
 # Configuração da página
 st.set_page_config(page_title="Mapa VigiSolo", layout="wide")
-st.title("🗺️ Mapa Áreas Programa VigiSolo ")
+st.title("🗺️ Mapa Áreas Programa VigiSolo")
 
 # Carregar dados com cache
 @st.cache_data
@@ -25,8 +25,7 @@ df = carregar_dados()
 
 # Filtros
 st.markdown("### Filtros")
-col1, col2, _, _ = st.columns([1, 1, 3, 3])
-
+col1, col2 = st.columns(2)
 anos = sorted(df['ANO'].dropna().unique())
 meses_numeros = sorted(df['MES'].dropna().unique())
 
@@ -35,13 +34,21 @@ meses_nome = {
     7: "Julho", 8: "Agosto", 9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro"
 }
 
+bairros = sorted(df['BAIRRO'].dropna().unique())
+contaminantes = sorted(df['CONTAMINANTES'].dropna().unique())
+
 with col1:
-    st.markdown("**Ano**", unsafe_allow_html=True)
-    ano_selecionado = st.selectbox("", options=["Todos"] + list(anos), label_visibility="collapsed")
+    ano_selecionado = st.selectbox("Ano", options=["Todos"] + list(anos))
 
 with col2:
-    st.markdown("**Mês**", unsafe_allow_html=True)
-    mes_selecionado_nome = st.selectbox("", options=["Todos"] + [meses_nome[m] for m in meses_numeros], label_visibility="collapsed")
+    mes_selecionado_nome = st.selectbox("Mês", options=["Todos"] + [meses_nome[m] for m in meses_numeros])
+
+col3, col4 = st.columns(2)
+with col3:
+    bairro_selecionado = st.selectbox("Bairro", options=["Todos"] + bairros)
+
+with col4:
+    contaminante_selecionado = st.selectbox("Contaminante", options=["Todos"] + contaminantes)
 
 # Aplicar filtros
 df_filtrado = df.copy()
@@ -53,6 +60,12 @@ if mes_selecionado_nome != "Todos":
     mes_num = [num for num, nome in meses_nome.items() if nome == mes_selecionado_nome][0]
     df_filtrado = df_filtrado[df_filtrado['MES'] == mes_num]
 
+if bairro_selecionado != "Todos":
+    df_filtrado = df_filtrado[df_filtrado['BAIRRO'] == bairro_selecionado]
+
+if contaminante_selecionado != "Todos":
+    df_filtrado = df_filtrado[df_filtrado['CONTAMINANTES'] == contaminante_selecionado]
+
 # Controle de renderização
 if 'mostrar_mapa' not in st.session_state:
     st.session_state.mostrar_mapa = False
@@ -60,7 +73,7 @@ if 'mostrar_mapa' not in st.session_state:
 if st.button("Gerar Mapa"):
     st.session_state.mostrar_mapa = True
 
-# Criar ou atualizar mapa somente se mostrar_mapa for True
+# Gerar mapa
 if st.session_state.mostrar_mapa:
     if not df_filtrado.empty:
         map_center = df_filtrado[['lat', 'lon']].mean().tolist()
@@ -80,13 +93,23 @@ if st.session_state.mostrar_mapa:
                 f"{imagem_html}"
             )
 
+            risco = str(row['POPULAÇÃO EXPOSTA']).lower()
+            if "alta" in risco:
+                cor_icon = "darkred"
+            elif "média" in risco or "media" in risco:
+                cor_icon = "orange"
+            elif "baixa" in risco:
+                cor_icon = "green"
+            else:
+                cor_icon = "gray"
+
             iframe = folium.IFrame(html=popup_text, width=300, height=300)
             popup = folium.Popup(iframe, max_width=300)
 
             folium.Marker(
                 location=[row['lat'], row['lon']],
                 popup=popup,
-                icon=folium.Icon(color="red", icon="exclamation-sign"),
+                icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
             ).add_to(marker_cluster)
 
         st_folium(m, width=1000, height=600)

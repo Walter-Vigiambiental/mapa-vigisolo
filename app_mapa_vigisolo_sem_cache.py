@@ -11,7 +11,8 @@ sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyE
 st.set_page_config(page_title="Mapa VigiSolo", layout="wide")
 st.title("🗺️ Mapa Áreas Programa VigiSolo")
 
-# Carregar dados sem cache
+# Carregar dados com cache
+@st.cache_data
 def carregar_dados():
     df = pd.read_csv(sheet_url)
     df[['lat', 'lon']] = df['COORDENADAS'].str.split(', ', expand=True).astype(float)

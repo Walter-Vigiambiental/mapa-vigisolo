@@ -3,6 +3,7 @@ import pandas as pd
 import folium
 from folium.plugins import MarkerCluster
 from streamlit_folium import st_folium
+from streamlit_extras.st_autorefresh import st_autorefresh 
 
 st.experimental_rerun() if st_autorefresh(interval=30000, limit=100) else None
 

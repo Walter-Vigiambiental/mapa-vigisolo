@@ -11,7 +11,11 @@ sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyE
 st.set_page_config(page_title="Mapa VigiSolo", layout="wide")
 st.title("🗺️ Mapa Áreas Programa VigiSolo")
 
-# Carregar dados sem cache
+# Inicializa estado de renderização do mapa
+if "mostrar_mapa" not in st.session_state:
+    st.session_state.mostrar_mapa = False
+
+# Carregar dados (sem cache)
 def carregar_dados():
     df = pd.read_csv(sheet_url)
     df[['lat', 'lon']] = df['COORDENADAS'].str.split(', ', expand=True).astype(float)
@@ -22,7 +26,7 @@ def carregar_dados():
 
 df = carregar_dados()
 
-# Filtros
+# Filtros interativos
 st.markdown("### Filtros")
 col1, col2 = st.columns(2)
 anos = sorted(df['ANO'].dropna().unique())
@@ -46,6 +50,10 @@ with col3:
 with col4:
     contaminante_selecionado = st.selectbox("Contaminante", options=["Todos"] + contaminantes)
 
+# Botão para renderizar mapa (mantém estado)
+if st.button("Gerar Mapa"):
+    st.session_state.mostrar_mapa = True
+
 # Aplicar filtros
 df_filtrado = df.copy()
 if ano_selecionado != "Todos":
@@ -58,14 +66,7 @@ if bairro_selecionado != "Todos":
 if contaminante_selecionado != "Todos":
     df_filtrado = df_filtrado[df_filtrado['CONTAMINANTES'] == contaminante_selecionado]
 
-# Controle de renderização
-if 'mostrar_mapa' not in st.session_state:
-    st.session_state.mostrar_mapa = False
-
-if st.button("Gerar Mapa"):
-    st.session_state.mostrar_mapa = True
-
-# Criar mapa
+# Criar e exibir mapa
 if st.session_state.mostrar_mapa:
     if not df_filtrado.empty:
         map_center = df_filtrado[['lat', 'lon']].mean().tolist()
@@ -105,7 +106,6 @@ if st.session_state.mostrar_mapa:
             ).add_to(marker_cluster)
 
         st_folium(m, width=1000, height=600)
-
     else:
         st.warning("Nenhum dado encontrado para os filtros selecionados.")
 

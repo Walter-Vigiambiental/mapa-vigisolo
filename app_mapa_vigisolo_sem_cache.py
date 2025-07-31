@@ -28,9 +28,7 @@ df = carregar_dados()
 
 # Filtros
 st.markdown("### Filtros")
-
-# Reduz tamanho dos filtros usando columns com proporções menores
-col1, col2 = st.columns([1, 1])
+col1, col2 = st.columns(2)
 anos = sorted(df['ANO'].dropna().unique())
 meses_numeros = sorted(df['MES'].dropna().unique())
 meses_nome = {
@@ -42,20 +40,15 @@ bairros = sorted(df['BAIRRO'].dropna().unique())
 contaminantes = sorted(df['CONTAMINANTES'].dropna().unique())
 
 with col1:
-    ano_selecionado = st.selectbox("Ano", options=["Todos"] + list(anos), key="ano", label_visibility="collapsed")
-    st.markdown("<label style='font-size: 12px;'>Ano</label>", unsafe_allow_html=True)
-
+    ano_selecionado = st.selectbox("Ano", options=["Todos"] + list(anos))
 with col2:
-    mes_selecionado_nome = st.selectbox("Mês", options=["Todos"] + [meses_nome[m] for m in meses_numeros], key="mes", label_visibility="collapsed")
-    st.markdown("<label style='font-size: 12px;'>Mês</label>", unsafe_allow_html=True)
+    mes_selecionado_nome = st.selectbox("Mês", options=["Todos"] + [meses_nome[m] for m in meses_numeros])
 
-col3, col4 = st.columns([1, 1])
+col3, col4 = st.columns(2)
 with col3:
-    bairro_selecionado = st.selectbox("Bairro", options=["Todos"] + bairros, key="bairro", label_visibility="collapsed")
-    st.markdown("<label style='font-size: 12px;'>Bairro</label>", unsafe_allow_html=True)
+    bairro_selecionado = st.selectbox("Bairro", options=["Todos"] + bairros)
 with col4:
-    contaminante_selecionado = st.selectbox("Contaminante", options=["Todos"] + contaminantes, key="contaminante", label_visibility="collapsed")
-    st.markdown("<label style='font-size: 12px;'>Contaminante</label>", unsafe_allow_html=True)
+    contaminante_selecionado = st.selectbox("Contaminante", options=["Todos"] + contaminantes)
 
 # Botão para gerar mapa
 if st.button("Gerar Mapa"):
@@ -83,13 +76,12 @@ if st.session_state.mostrar_mapa:
         for _, row in df_filtrado.iterrows():
             imagem_html = f'<br><img src="{row["URL_FOTO"]}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
 
-            data_formatada = row['DATA'].strftime('%d/%m/%Y') if pd.notna(row['DATA']) else "Data inválida"
             popup_text = (
                 f"<strong>Área:</strong> {row['DENOMINAÇÃO DA ÁREA']}<br>"
                 f"<strong>Bairro:</strong> {row['BAIRRO']}<br>"
                 f"<strong>Contaminantes:</strong> {row['CONTAMINANTES']}<br>"
                 f"<strong>População Exposta:</strong> {row['POPULAÇÃO EXPOSTA']}<br>"
-                f"<strong>Data:</strong> {data_formatada}<br>"
+                f"<strong>Data:</strong> {row['DATA'].date()}<br>"
                 f"<strong>Coordenadas:</strong> {row['lat']}, {row['lon']}"
                 f"{imagem_html}"
             )
@@ -113,11 +105,11 @@ if st.session_state.mostrar_mapa:
                 icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
             ).add_to(marker_cluster)
 
+        # Exibe o mapa sem atribuir a uma variável (sem captura de clique)
         st_folium(m, width=1000, height=600)
     else:
         st.warning("Nenhum dado encontrado para os filtros selecionados.")
 
 st.markdown("---")
 st.caption("Desenvolvido por Walter Alves usando Streamlit.")
-
 

@@ -11,11 +11,11 @@ sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyE
 st.set_page_config(page_title="Mapa VigiSolo", layout="wide")
 st.title("🗺️ Mapa Áreas Programa VigiSolo")
 
-# Inicializa estado de renderização do mapa
+# Estado de exibição do mapa
 if "mostrar_mapa" not in st.session_state:
     st.session_state.mostrar_mapa = False
 
-# Carregar dados (sem cache)
+# Carregar dados
 def carregar_dados():
     df = pd.read_csv(sheet_url)
     df[['lat', 'lon']] = df['COORDENADAS'].str.split(', ', expand=True).astype(float)
@@ -26,7 +26,7 @@ def carregar_dados():
 
 df = carregar_dados()
 
-# Filtros interativos
+# Filtros
 st.markdown("### Filtros")
 col1, col2 = st.columns(2)
 anos = sorted(df['ANO'].dropna().unique())
@@ -50,7 +50,7 @@ with col3:
 with col4:
     contaminante_selecionado = st.selectbox("Contaminante", options=["Todos"] + contaminantes)
 
-# Botão para renderizar mapa (mantém estado)
+# Botão para gerar mapa
 if st.button("Gerar Mapa"):
     st.session_state.mostrar_mapa = True
 
@@ -66,7 +66,7 @@ if bairro_selecionado != "Todos":
 if contaminante_selecionado != "Todos":
     df_filtrado = df_filtrado[df_filtrado['CONTAMINANTES'] == contaminante_selecionado]
 
-# Criar e exibir mapa
+# Criar mapa sem captura de clique
 if st.session_state.mostrar_mapa:
     if not df_filtrado.empty:
         map_center = df_filtrado[['lat', 'lon']].mean().tolist()
@@ -105,8 +105,8 @@ if st.session_state.mostrar_mapa:
                 icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
             ).add_to(marker_cluster)
 
+        # Exibe o mapa sem atribuir a uma variável (sem captura de clique)
         st_folium(m, width=1000, height=600)
-
     else:
         st.warning("Nenhum dado encontrado para os filtros selecionados.")
 

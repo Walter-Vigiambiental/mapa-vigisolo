@@ -4,6 +4,8 @@ import folium
 from folium.plugins import MarkerCluster
 from streamlit_folium import st_folium
 
+st.experimental_rerun() if st_autorefresh(interval=30000, limit=100) else None
+
 # URL da planilha pública (CSV)
 sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0tNytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv"
 

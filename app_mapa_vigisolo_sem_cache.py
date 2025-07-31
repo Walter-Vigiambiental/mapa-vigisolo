@@ -105,7 +105,11 @@ if st.session_state.mostrar_mapa:
                 icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
             ).add_to(marker_cluster)
 
-        st_folium(m, width=1000, height=600)
+        map_data = st_folium(m, width=1000, height=600)
+
+if map_data and "last_object_clicked" in map_data and "clicou" not in st.session_state:
+    st.session_state.clicked_marker = map_data["last_object_clicked"]
+    st.session_state.clicou = True
     else:
         st.warning("Nenhum dado encontrado para os filtros selecionados.")
 

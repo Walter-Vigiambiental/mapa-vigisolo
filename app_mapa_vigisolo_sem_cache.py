@@ -104,7 +104,8 @@ if st.session_state.mostrar_mapa:
                 icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
             ).add_to(marker_cluster)
 
-        st_folium(m, width=1000, height=600, return_map_on_click=False)
+        st_folium(m, width=1000, height=600)
+
     else:
         st.warning("Nenhum dado encontrado para os filtros selecionados.")
 

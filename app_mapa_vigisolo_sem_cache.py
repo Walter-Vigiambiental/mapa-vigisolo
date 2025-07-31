@@ -39,9 +39,6 @@ meses_nome = {
 bairros = sorted(df['BAIRRO'].dropna().unique())
 contaminantes = sorted(df['CONTAMINANTES'].dropna().unique())
 
-# Filtros compactados
-st.markdown("#### 🎛️ Filtros")
-
 col1, col2, col3, col4 = st.columns([1, 1, 1.2, 1.2])  # proporções ajustadas para mais equilíbrio visual
 
 with col1:

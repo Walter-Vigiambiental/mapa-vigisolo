@@ -40,15 +40,31 @@ bairros = sorted(df['BAIRRO'].dropna().unique())
 contaminantes = sorted(df['CONTAMINANTES'].dropna().unique())
 
 with col1:
-    ano_selecionado = st.selectbox("Ano", options=["Todos"] + list(anos))
+    ano_selecionado = st.selectbox(
+        "Ano",
+        options=["Todos"] + list(anos),
+        label_visibility="collapsed"
+    )
 with col2:
-    mes_selecionado_nome = st.selectbox("Mês", options=["Todos"] + [meses_nome[m] for m in meses_numeros])
+    mes_selecionado_nome = st.selectbox(
+        "Mês",
+        options=["Todos"] + [meses_nome[m] for m in meses_numeros],
+        label_visibility="collapsed"
+    )
 
-col3, col4 = st.columns(2)
+col3, col4 = st.columns([1, 1])  # você pode ajustar os valores para diminuir ainda mais
 with col3:
-    bairro_selecionado = st.selectbox("Bairro", options=["Todos"] + bairros)
+    bairro_selecionado = st.selectbox(
+        "Bairro",
+        options=["Todos"] + bairros,
+        label_visibility="collapsed"
+    )
 with col4:
-    contaminante_selecionado = st.selectbox("Contaminante", options=["Todos"] + contaminantes)
+    contaminante_selecionado = st.selectbox(
+        "Contaminante",
+        options=["Todos"] + contaminantes,
+        label_visibility="collapsed"
+    )
 
 # Botão para gerar mapa
 if st.button("Gerar Mapa"):

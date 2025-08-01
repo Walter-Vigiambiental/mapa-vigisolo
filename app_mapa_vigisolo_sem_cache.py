@@ -3,18 +3,29 @@ import pandas as pd
 import folium
 from folium.plugins import MarkerCluster
 from streamlit_folium import st_folium
-from folium import Element
 
 # URL da planilha pública (CSV)
 sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0tNytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv"
 
 # Configuração da página
 st.set_page_config(page_title="Mapa VigiSolo", layout="wide")
+
+# Reduzir espaço inferior
+st.markdown("""
+    <style>
+        .main .block-container {
+            padding-bottom: 0rem;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 st.title("🗺️ Mapa Áreas Programa VigiSolo")
 
+# Estado de exibição do mapa
 if "mostrar_mapa" not in st.session_state:
     st.session_state.mostrar_mapa = False
 
+# Carregar dados
 def carregar_dados():
     df = pd.read_csv(sheet_url)
     df[['lat', 'lon']] = df['COORDENADAS'].str.split(', ', expand=True).astype(float)
@@ -25,26 +36,31 @@ def carregar_dados():
 
 df = carregar_dados()
 
-# 🎛️ Filtros
+# Filtros
 st.markdown("### Filtros")
-col1, col2, col3, col4 = st.columns([1, 1, 1.2, 1.2])
-
 anos = sorted(df['ANO'].dropna().unique())
-meses_nome = {1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril", 5: "Maio", 6: "Junho",
-              7: "Julho", 8: "Agosto", 9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro"}
 meses_numeros = sorted(df['MES'].dropna().unique())
+meses_nome = {
+    1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril", 5: "Maio", 6: "Junho",
+    7: "Julho", 8: "Agosto", 9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro"
+}
 bairros = sorted(df['BAIRRO'].dropna().unique())
 contaminantes = sorted(df['CONTAMINANTES'].dropna().unique())
 
-ano_selecionado = col1.selectbox("Ano", ["Todos"] + list(anos))
-mes_selecionado_nome = col2.selectbox("Mês", ["Todos"] + [meses_nome[m] for m in meses_numeros])
-bairro_selecionado = col3.selectbox("Bairro", ["Todos"] + bairros)
-contaminante_selecionado = col4.selectbox("Contaminante", ["Todos"] + contaminantes)
+col1, col2, col3, col4 = st.columns([1, 1, 1.2, 1.2])
+with col1:
+    ano_selecionado = st.selectbox("Ano", options=["Todos"] + list(anos))
+with col2:
+    mes_selecionado_nome = st.selectbox("Mês", options=["Todos"] + [meses_nome[m] for m in meses_numeros])
+with col3:
+    bairro_selecionado = st.selectbox("Bairro", options=["Todos"] + bairros)
+with col4:
+    contaminante_selecionado = st.selectbox("Contaminante", options=["Todos"] + contaminantes)
 
 if st.button("Gerar Mapa"):
     st.session_state.mostrar_mapa = True
 
-# 🔍 Filtragem
+# Aplicar filtros
 df_filtrado = df.copy()
 if ano_selecionado != "Todos":
     df_filtrado = df_filtrado[df_filtrado['ANO'] == ano_selecionado]
@@ -56,86 +72,53 @@ if bairro_selecionado != "Todos":
 if contaminante_selecionado != "Todos":
     df_filtrado = df_filtrado[df_filtrado['CONTAMINANTES'] == contaminante_selecionado]
 
-# 🗺️ Mapa com popups e legenda
+# Criar mapa
 if st.session_state.mostrar_mapa:
     if not df_filtrado.empty:
         map_center = df_filtrado[['lat', 'lon']].mean().tolist()
-        m = folium.Map(location=map_center, zoom_start=12, tiles="CartoDB positron")
+        m = folium.Map(location=map_center, zoom_start=12)
         marker_cluster = MarkerCluster().add_to(m)
 
         for _, row in df_filtrado.iterrows():
-            imagem_html = f"<br><img src='{row['URL_FOTO']}' width='250'>" if pd.notna(row.get("URL_FOTO")) else ""
+            imagem_html = f'<br><img src="{row["URL_FOTO"]}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
 
-            risco = str(row.get('RISCO', '')).lower().strip()
-            if "alto" in risco:
+            risco = str(row['POPULAÇÃO EXPOSTA'])
+            risco_lower = risco.lower()
+            if "alta" in risco_lower:
                 cor_icon = "darkred"
-            elif "médio" in risco or "medio" in risco:
+            elif "média" in risco_lower or "media" in risco_lower:
                 cor_icon = "orange"
-            elif "baixo" in risco:
+            elif "baixa" in risco_lower:
                 cor_icon = "green"
             else:
                 cor_icon = "gray"
 
-            popup_html = f"""
-            <div style='font-family:Arial, sans-serif; background-color:#fff; border-radius:8px;
-                 padding:10px; box-shadow:0 2px 6px rgba(0,0,0,0.3);'>
-                <h4 style='margin-top:0; color:#2F4F4F;'>{row['DENOMINAÇÃO DA ÁREA']}</h4>
-                <p><strong>Bairro:</strong> {row['BAIRRO']}<br>
-                   <strong>Contaminantes:</strong> {row['CONTAMINANTES']}<br>
-                   <strong>População Exposta:</strong> {row['POPULAÇÃO EXPOSTA']}<br>
-                   <strong>Data:</strong> {row['DATA'].date()}<br>
-                   <strong>Coordenadas:</strong> {row['lat']}, {row['lon']}</p>
-                {imagem_html}
-            </div>
-            """
-            iframe = folium.IFrame(html=popup_html, width=300, height=320)
-            popup = folium.Popup(iframe, max_width=320)
+            popup_text = (
+                f"<strong>Área:</strong> {row['DENOMINAÇÃO DA ÁREA']}<br>"
+                f"<strong>Bairro:</strong> {row['BAIRRO']}<br>"
+                f"<strong>Contaminantes:</strong> {row['CONTAMINANTES']}<br>"
+                f"<strong>População Exposta:</strong> {risco}<br>"
+                f"<strong>Data:</strong> {row['DATA'].date()}<br>"
+                f"<strong>Coordenadas:</strong> {row['lat']}, {row['lon']}"
+                f"{imagem_html}"
+            )
+
+            iframe = folium.IFrame(html=popup_text, width=300, height=300)
+            popup = folium.Popup(iframe, max_width=300)
 
             folium.Marker(
                 location=[row['lat'], row['lon']],
                 popup=popup,
-                icon=folium.Icon(color=cor_icon, icon="exclamation-sign")
+                icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
             ).add_to(marker_cluster)
-
-        # 🔖 Legenda de risco
-        legend_html = '''
-        <div style="
-            position: fixed;
-            bottom: 50px;
-            left: 50px;
-            width: 180px;
-            height: auto;
-            background-color: white;
-            border:2px solid gray;
-            z-index:9999;
-            font-size:14px;
-            padding: 10px;
-            box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
-        ">
-            <strong>Legenda de Risco</strong><br><br>
-            <div style="margin-bottom:5px;">
-                <i style="background:darkred; width:12px; height:12px; float:left; margin-right:8px;"></i> Alto
-            </div>
-            <div style="margin-bottom:5px;">
-                <i style="background:orange; width:12px; height:12px; float:left; margin-right:8px;"></i> Médio
-            </div>
-            <div style="margin-bottom:5px;">
-                <i style="background:green; width:12px; height:12px; float:left; margin-right:8px;"></i> Baixo
-            </div>
-            <div>
-                <i style="background:gray; width:12px; height:12px; float:left; margin-right:8px;"></i> Indefinido
-            </div>
-        </div>
-        '''
-
-        m.get_root().html.add_child(folium.Element(legend_html))
 
         st_folium(m, width=1000, height=600, returned_objects=[])
     else:
         st.warning("Nenhum dado encontrado para os filtros selecionados.")
 
+# Rodapé enxuto
 st.markdown(
-    "<div style='margin-top: -20px; text-align: center; font-size: 14px; color: gray;'>"
+    "<div style='margin-top: -10px; text-align: center; font-size: 14px; color: gray;'>"
     "Desenvolvido por Walter Alves usando Streamlit."
     "</div>",
     unsafe_allow_html=True

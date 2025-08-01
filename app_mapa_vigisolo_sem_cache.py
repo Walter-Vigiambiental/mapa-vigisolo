@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import folium
@@ -87,12 +86,16 @@ if st.session_state.mostrar_mapa:
             risco_lower = risco.lower()
             if "alto" in risco_lower:
                 cor_icon = "darkred"
+                emoji_risco = "🔴"
             elif "médio" in risco_lower or "medio" in risco_lower:
                 cor_icon = "orange"
+                emoji_risco = "🟠"
             elif "baixo" in risco_lower:
                 cor_icon = "green"
+                emoji_risco = "🟢"
             else:
                 cor_icon = "gray"
+                emoji_risco = "⚪"
 
             popup_text = (
                 f"<strong>Área:</strong> {row['DENOMINAÇÃO DA ÁREA']}<br>"
@@ -101,7 +104,7 @@ if st.session_state.mostrar_mapa:
                 f"<strong>População Exposta:</strong> {row['POPULAÇÃO EXPOSTA']}<br>"
                 f"<strong>Data:</strong> {row['DATA'].date()}<br>"
                 f"<strong>Coordenadas:</strong> {row['lat']}, {row['lon']}<br>"
-                f"<strong>Risco:</strong> {risco}"
+                f"<strong>Risco:</strong> {emoji_risco} {risco}"
                 f"{imagem_html}"
             )
 

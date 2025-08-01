@@ -98,18 +98,37 @@ if st.session_state.mostrar_mapa:
             ).add_to(marker_cluster)
 
         # 🔖 Legenda de risco
-        legenda_html = """
-        <div style='position: fixed; bottom: 40px; left: 40px; z-index:9999; background-color: white;
-             border: 1px solid #ccc; padding: 10px; border-radius: 5px; font-size:14px;
-             box-shadow:0 2px 6px rgba(0,0,0,0.3);'>
-          <b>Legenda de Risco</b><br>
-          <i class="fa fa-map-marker fa-lg" style="color:darkred"></i> Alto<br>
-          <i class="fa fa-map-marker fa-lg" style="color:orange"></i> Médio<br>
-          <i class="fa fa-map-marker fa-lg" style="color:green"></i> Baixo<br>
-          <i class="fa fa-map-marker fa-lg" style="color:gray"></i> Indefinido
-        </div>
-        """
-        m.get_root().html.add_child(Element(legenda_html))
+        legend_html = '''
+<div style="
+    position: fixed;
+    bottom: 50px;
+    left: 50px;
+    width: 180px;
+    height: auto;
+    background-color: white;
+    border:2px solid gray;
+    z-index:9999;
+    font-size:14px;
+    padding: 10px;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+">
+    <strong>Legenda de Risco</strong><br><br>
+    <div style="margin-bottom:5px;">
+        <i style="background:darkred; width:12px; height:12px; float:left; margin-right:8px;"></i> Muito Alto / Alto
+    </div>
+    <div style="margin-bottom:5px;">
+        <i style="background:orange; width:12px; height:12px; float:left; margin-right:8px;"></i> Médio
+    </div>
+    <div style="margin-bottom:5px;">
+        <i style="background:green; width:12px; height:12px; float:left; margin-right:8px;"></i> Baixo
+    </div>
+    <div>
+        <i style="background:gray; width:12px; height:12px; float:left; margin-right:8px;"></i> Indefinido
+    </div>
+</div>
+'''
+
+mapa.get_root().html.add_child(folium.Element(legend_html))
 
         st_folium(m, width=1000, height=600, returned_objects=[])
     else:

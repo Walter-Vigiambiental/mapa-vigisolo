@@ -66,7 +66,7 @@ if st.session_state.mostrar_mapa:
         for _, row in df_filtrado.iterrows():
             imagem_html = f"<br><img src='{row['URL_FOTO']}' width='250'>" if pd.notna(row.get("URL_FOTO")) else ""
 
-            risco = str(row.get('RISCO, '')).lower().strip()
+            risco = str(row.get('RISCO', '')).lower().strip()
             if "alta" in risco:
                 cor_icon = "darkred"
             elif "média" in risco or "media" in risco:

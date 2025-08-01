@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import folium
@@ -99,11 +100,12 @@ if st.session_state.mostrar_mapa:
                 f"<strong>Contaminantes:</strong> {row['CONTAMINANTES']}<br>"
                 f"<strong>População Exposta:</strong> {risco}<br>"
                 f"<strong>Data:</strong> {row['DATA'].date()}<br>"
-                f"<strong>Coordenadas:</strong> {row['lat']}, {row['lon']}"
+                f"<strong>Coordenadas:</strong> {row['lat']}, {row['lon']}<br>"
+                f"<strong>Risco:</strong> {risco}"
                 f"{imagem_html}"
             )
 
-            iframe = folium.IFrame(html=popup_text, width=300, height=300)
+            iframe = folium.IFrame(html=popup_text, width=300, height=320)
             popup = folium.Popup(iframe, max_width=300)
 
             folium.Marker(

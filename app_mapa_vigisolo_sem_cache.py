@@ -122,7 +122,7 @@ if st.session_state.mostrar_mapa:
             ).add_to(marker_cluster)
 
         # Exibe o mapa sem atribuir a uma variável (sem captura de clique)
-        st_folium(m, width=1000, height=600)
+        st_folium(m, width=1000, height=600, returned_objects=[])
     else:
         st.warning("Nenhum dado encontrado para os filtros selecionados.")
 

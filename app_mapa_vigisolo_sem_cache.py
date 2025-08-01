@@ -83,7 +83,7 @@ if st.session_state.mostrar_mapa:
         for _, row in df_filtrado.iterrows():
             imagem_html = f'<br><img src="{row["URL_FOTO"]}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
 
-            risco = str(row['POPULAÇÃO EXPOSTA'])
+            risco = str(row.get('RISCO', 'Não informado'))
             risco_lower = risco.lower()
             if "alta" in risco_lower:
                 cor_icon = "darkred"
@@ -98,7 +98,7 @@ if st.session_state.mostrar_mapa:
                 f"<strong>Área:</strong> {row['DENOMINAÇÃO DA ÁREA']}<br>"
                 f"<strong>Bairro:</strong> {row['BAIRRO']}<br>"
                 f"<strong>Contaminantes:</strong> {row['CONTAMINANTES']}<br>"
-                f"<strong>População Exposta:</strong> {risco}<br>"
+                f"<strong>População Exposta:</strong> {row['POPULAÇÃO EXPOSTA']}<br>"
                 f"<strong>Data:</strong> {row['DATA'].date()}<br>"
                 f"<strong>Coordenadas:</strong> {row['lat']}, {row['lon']}<br>"
                 f"<strong>Risco:</strong> {risco}"
@@ -125,3 +125,4 @@ st.markdown(
     "</div>",
     unsafe_allow_html=True
 )
+

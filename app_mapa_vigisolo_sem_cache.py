@@ -3,7 +3,7 @@ import pandas as pd
 import folium
 from folium.plugins import MarkerCluster
 from streamlit_folium import st_folium
-from branca.element import Template, MacroElement
+from branca.element import Element
 
 # URL da planilha pública (CSV)
 sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0tNytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv"
@@ -97,35 +97,31 @@ if st.session_state.mostrar_mapa:
             folium.Marker(
                 location=[row['lat'], row['lon']],
                 popup=popup,
-                icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
+                icon=folium.Icon(color=cor_icon, icon="circle", prefix="fa"),
             ).add_to(marker_cluster)
 
-        # Legenda HTML fixa no mapa
+        # Legenda fixa no canto inferior direito DENTRO do mapa
         legenda_html = """
-        {% macro html(this, kwargs) %}
         <div style="
-            position: fixed;
-            bottom: 50px;
-            right: 50px;
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
             z-index: 9999;
             background-color: white;
-            border: 2px solid gray;
             padding: 10px;
+            border: 2px solid gray;
             border-radius: 8px;
             font-size: 14px;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
         ">
-            <b>Legenda - Risco</b><br>
-            <i class="fa fa-map-marker fa-2x" style="color:darkred"></i> Alta<br>
-            <i class="fa fa-map-marker fa-2x" style="color:orange"></i> Média<br>
-            <i class="fa fa-map-marker fa-2x" style="color:green"></i> Baixa<br>
-            <i class="fa fa-map-marker fa-2x" style="color:gray"></i> Não informado
+            <strong>Legenda - Risco</strong><br>
+            <svg height="10" width="10"><circle cx="5" cy="5" r="5" fill="darkred"/></svg> Alta<br>
+            <svg height="10" width="10"><circle cx="5" cy="5" r="5" fill="orange"/></svg> Média<br>
+            <svg height="10" width="10"><circle cx="5" cy="5" r="5" fill="green"/></svg> Baixa<br>
+            <svg height="10" width="10"><circle cx="5" cy="5" r="5" fill="gray"/></svg> Não informado
         </div>
-        {% endmacro %}
         """
-        legenda = MacroElement()
-        legenda._template = Template(legenda_html)
-        m.get_root().add_child(legenda)
+        m.get_root().html.add_child(Element(legenda_html))
 
         st_folium(m, width=1000, height=600, returned_objects=[])
     else:

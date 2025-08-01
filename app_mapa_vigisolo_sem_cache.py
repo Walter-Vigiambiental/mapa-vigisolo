@@ -100,25 +100,36 @@ if st.session_state.mostrar_mapa:
                 icon=folium.Icon(color=cor_icon, icon="circle", prefix="fa"),
             ).add_to(marker_cluster)
 
-        # Legenda fixa no canto inferior direito DENTRO do mapa
+        # Legenda interna com círculos
         legenda_html = """
-        <div style="
+        <style>
+        .legend {
             position: absolute;
-            bottom: 30px;
-            right: 30px;
-            z-index: 9999;
-            background-color: white;
+            bottom: 20px;
+            right: 20px;
+            background: white;
             padding: 10px;
             border: 2px solid gray;
             border-radius: 8px;
             font-size: 14px;
-            box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
-        ">
-            <strong>Legenda - Risco</strong><br>
-            <svg height="10" width="10"><circle cx="5" cy="5" r="5" fill="darkred"/></svg> Alta<br>
-            <svg height="10" width="10"><circle cx="5" cy="5" r="5" fill="orange"/></svg> Média<br>
-            <svg height="10" width="10"><circle cx="5" cy="5" r="5" fill="green"/></svg> Baixa<br>
-            <svg height="10" width="10"><circle cx="5" cy="5" r="5" fill="gray"/></svg> Não informado
+            z-index: 9999;
+        }
+        .legend div {
+            margin-bottom: 5px;
+        }
+        .circle {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 6px;
+            margin-right: 8px;
+        }
+        </style>
+        <div class='legend'>
+            <div><span class='circle' style='background: darkred'></span>Alta</div>
+            <div><span class='circle' style='background: orange'></span>Média</div>
+            <div><span class='circle' style='background: green'></span>Baixa</div>
+            <div><span class='circle' style='background: gray'></span>Não informado</div>
         </div>
         """
         m.get_root().html.add_child(Element(legenda_html))
@@ -129,4 +140,3 @@ if st.session_state.mostrar_mapa:
 
 st.markdown("---")
 st.caption("Desenvolvido por Walter Alves usando Streamlit.")
-

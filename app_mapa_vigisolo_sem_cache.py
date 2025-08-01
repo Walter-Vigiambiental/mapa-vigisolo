@@ -3,7 +3,6 @@ import pandas as pd
 import folium
 from folium.plugins import MarkerCluster
 from streamlit_folium import st_folium
-from branca.element import Template, MacroElement
 
 # URL da planilha pública (CSV)
 sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0tNytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv"
@@ -56,7 +55,7 @@ if bairro_selecionado != "Todos":
 if contaminante_selecionado != "Todos":
     df_filtrado = df_filtrado[df_filtrado['CONTAMINANTES'] == contaminante_selecionado]
 
-# 🗺️ Mapa com popups e legenda
+# 🗺️ Mapa + Legenda
 if st.session_state.mostrar_mapa:
     if not df_filtrado.empty:
         map_center = df_filtrado[['lat', 'lon']].mean().tolist()
@@ -97,44 +96,38 @@ if st.session_state.mostrar_mapa:
                 icon=folium.Icon(color=cor_icon, icon="exclamation-sign")
             ).add_to(marker_cluster)
 
-        # 🔖 Legenda embutida no mapa (correta!)
-        legend_html = '''
-        {% macro html(this, kwargs) %}
-        <div style="
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            width: 180px;
+        # 📌 Legenda fora do mapa, estilizada no Streamlit
+        legenda_html = """
+        <div style='
             background-color: white;
-            border:2px solid gray;
-            z-index:9999;
-            font-size:14px;
+            border: 2px solid gray;
             padding: 10px;
-            box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
-            border-radius: 5px;
-        ">
-            <strong>Legenda de Risco</strong><br><br>
-            <div style="margin-bottom:5px;">
-                <i style="background:darkred; width:12px; height:12px; display:inline-block; margin-right:8px;"></i> Alto
-            </div>
-            <div style="margin-bottom:5px;">
-                <i style="background:orange; width:12px; height:12px; display:inline-block; margin-right:8px;"></i> Médio
-            </div>
-            <div style="margin-bottom:5px;">
-                <i style="background:green; width:12px; height:12px; display:inline-block; margin-right:8px;"></i> Baixo
-            </div>
-            <div>
-                <i style="background:gray; width:12px; height:12px; display:inline-block; margin-right:8px;"></i> Indefinido
-            </div>
+            font-size: 14px;
+            border-radius: 8px;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+        '>
+        <strong>🧭 Legenda de Risco</strong><br><br>
+        <div style='margin-bottom:6px;'>
+            <span style='background-color:darkred; width:12px; height:12px; display:inline-block; margin-right:8px;'></span> Alto
         </div>
-        {% endmacro %}
-        '''
+        <div style='margin-bottom:6px;'>
+            <span style='background-color:orange; width:12px; height:12px; display:inline-block; margin-right:8px;'></span> Médio
+        </div>
+        <div style='margin-bottom:6px;'>
+            <span style='background-color:green; width:12px; height:12px; display:inline-block; margin-right:8px;'></span> Baixo
+        </div>
+        <div>
+            <span style='background-color:gray; width:12px; height:12px; display:inline-block; margin-right:8px;'></span> Indefinido
+        </div>
+        </div>
+        """
 
-        macro = MacroElement()
-        macro._template = Template(legend_html)
-        m.get_root().add_child(macro)
+        col_legenda, col_mapa = st.columns([0.22, 0.78])
+        with col_legenda:
+            st.markdown(legenda_html, unsafe_allow_html=True)
+        with col_mapa:
+            st_folium(m, width=900, height=600)
 
-        st_folium(m, width=1000, height=600, returned_objects=[])
     else:
         st.warning("Nenhum dado encontrado para os filtros selecionados.")
 

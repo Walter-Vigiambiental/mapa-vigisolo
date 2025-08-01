@@ -96,46 +96,47 @@ if st.session_state.mostrar_mapa:
                 icon=folium.Icon(color=cor_icon, icon="exclamation-sign")
             ).add_to(marker_cluster)
 
-        # ✅ Legenda embutida e responsiva
+        # 🔖 Legenda como faixa horizontal na base do mapa
         legend_html = '''
         {% macro html(this, kwargs) %}
         <style>
         @media only screen and (max-width: 600px) {
-            .map-legend {
-                bottom: 20px !important;
-                left: 5px !important;
+            .map-footer-legend {
                 font-size: 11px !important;
-                width: 90vw !important;
+                width: 95vw !important;
+                left: 2.5vw !important;
+                bottom: 8px !important;
             }
         }
         </style>
-        <div class="map-legend" style="
+        <div class="map-footer-legend" style="
             position: absolute;
-            bottom: 10px;
-            left: 10px;
-            width: 180px;
+            bottom: 15px;
+            left: 20px;
+            width: calc(100% - 40px);
             background-color: white;
-            border:2px solid gray;
-            z-index:9999;
-            font-size:14px;
+            border: 2px solid gray;
             color: black;
-            padding: 10px;
-            box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+            padding: 6px 12px;
+            font-size: 13px;
+            z-index: 9999;
+            text-align: center;
             border-radius: 5px;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
         ">
-            <strong>Legenda de Risco</strong><br><br>
-            <div style="margin-bottom:5px;">
-                <i style="background:darkred; width:12px; height:12px; display:inline-block; margin-right:8px;"></i> Alto
-            </div>
-            <div style="margin-bottom:5px;">
-                <i style="background:orange; width:12px; height:12px; display:inline-block; margin-right:8px;"></i> Médio
-            </div>
-            <div style="margin-bottom:5px;">
-                <i style="background:green; width:12px; height:12px; display:inline-block; margin-right:8px;"></i> Baixo
-            </div>
-            <div>
-                <i style="background:gray; width:12px; height:12px; display:inline-block; margin-right:8px;"></i> Indefinido
-            </div>
+          <b>Legenda de Risco:</b>
+          <span style="margin-left: 10px;">
+            <i style="background:darkred; width:12px; height:12px; display:inline-block; margin-right:5px;"></i> Alto
+          </span>
+          <span style="margin-left: 10px;">
+            <i style="background:orange; width:12px; height:12px; display:inline-block; margin-right:5px;"></i> Médio
+          </span>
+          <span style="margin-left: 10px;">
+            <i style="background:green; width:12px; height:12px; display:inline-block; margin-right:5px;"></i> Baixo
+          </span>
+          <span style="margin-left: 10px;">
+            <i style="background:gray; width:12px; height:12px; display:inline-block; margin-right:5px;"></i> Indefinido
+          </span>
         </div>
         {% endmacro %}
         '''

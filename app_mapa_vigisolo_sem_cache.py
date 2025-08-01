@@ -67,11 +67,11 @@ if st.session_state.mostrar_mapa:
             imagem_html = f"<br><img src='{row['URL_FOTO']}' width='250'>" if pd.notna(row.get("URL_FOTO")) else ""
 
             risco = str(row.get('RISCO', '')).lower().strip()
-            if "alta" in risco:
+            if "alto" in risco:
                 cor_icon = "darkred"
-            elif "média" in risco or "media" in risco:
+            elif "médio" in risco or "medio" in risco:
                 cor_icon = "orange"
-            elif "baixa" in risco:
+            elif "baixo" in risco:
                 cor_icon = "green"
             else:
                 cor_icon = "gray"

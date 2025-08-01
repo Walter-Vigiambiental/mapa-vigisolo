@@ -83,13 +83,13 @@ if st.session_state.mostrar_mapa:
         for _, row in df_filtrado.iterrows():
             imagem_html = f'<br><img src="{row["URL_FOTO"]}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
 
-            risco = str(row.get('RISCO', 'Não informado'))
+            risco = str(row.get('RISCO', 'Não informado')).strip()
             risco_lower = risco.lower()
-            if "alta" in risco_lower:
+            if "alto" in risco_lower:
                 cor_icon = "darkred"
-            elif "média" in risco_lower or "media" in risco_lower:
+            elif "médio" in risco_lower or "medio" in risco_lower:
                 cor_icon = "orange"
-            elif "baixa" in risco_lower:
+            elif "baixo" in risco_lower:
                 cor_icon = "green"
             else:
                 cor_icon = "gray"
@@ -125,4 +125,3 @@ st.markdown(
     "</div>",
     unsafe_allow_html=True
 )
-

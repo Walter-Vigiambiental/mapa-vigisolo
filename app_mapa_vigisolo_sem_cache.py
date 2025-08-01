@@ -117,5 +117,3 @@ if st.session_state.mostrar_mapa:
 
 st.markdown("---")
 st.caption("Desenvolvido por Walter Alves usando Streamlit.")
-
-

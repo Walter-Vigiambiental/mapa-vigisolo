@@ -134,5 +134,9 @@ if st.session_state.mostrar_mapa:
     else:
         st.warning("Nenhum dado encontrado para os filtros selecionados.")
 
-st.markdown("---")
-st.caption("Desenvolvido por Walter Alves usando Streamlit.")
+st.markdown(
+    "<div style='margin-top: -20px; text-align: center; font-size: 14px; color: gray;'>"
+    "Desenvolvido por Walter Alves usando Streamlit."
+    "</div>",
+    unsafe_allow_html=True
+)

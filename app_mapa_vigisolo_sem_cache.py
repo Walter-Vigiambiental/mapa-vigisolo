@@ -130,7 +130,7 @@ if st.session_state.mostrar_mapa:
 
 mapa.get_root().html.add_child(folium.Element(legend_html))
 
-        st_folium(m, width=1000, height=600, returned_objects=[])
+st_folium(m, width=1000, height=600, returned_objects=[])
     else:
         st.warning("Nenhum dado encontrado para os filtros selecionados.")
 

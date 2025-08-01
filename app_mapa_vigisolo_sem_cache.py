@@ -114,7 +114,7 @@ if st.session_state.mostrar_mapa:
         ">
             <strong>Legenda de Risco</strong><br><br>
             <div style="margin-bottom:5px;">
-                <i style="background:darkred; width:12px; height:12px; float:left; margin-right:8px;"></i> Muito Alto / Alto
+                <i style="background:darkred; width:12px; height:12px; float:left; margin-right:8px;"></i> Alto
             </div>
             <div style="margin-bottom:5px;">
                 <i style="background:orange; width:12px; height:12px; float:left; margin-right:8px;"></i> Médio

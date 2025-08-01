@@ -98,8 +98,6 @@ if st.session_state.mostrar_mapa:
             ).add_to(marker_cluster)
 
         # 🔖 Legenda de risco
-        m.get_root().html.add_child(Element(legend_html))
-
         legend_html = '''
         <div style="
             position: fixed;

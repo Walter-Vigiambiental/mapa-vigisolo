@@ -8,7 +8,6 @@ from branca.element import Template, MacroElement
 # URL da planilha pública (CSV)
 sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0tNytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv"
 
-# Configuração da página
 st.set_page_config(page_title="Mapa VigiSolo", layout="wide")
 st.title("🗺️ Mapa Áreas Programa VigiSolo")
 
@@ -56,7 +55,7 @@ if bairro_selecionado != "Todos":
 if contaminante_selecionado != "Todos":
     df_filtrado = df_filtrado[df_filtrado['CONTAMINANTES'] == contaminante_selecionado]
 
-# 🗺️ Mapa com popups e legenda embutida
+# 🗺️ Mapa com popups e legenda
 if st.session_state.mostrar_mapa:
     if not df_filtrado.empty:
         map_center = df_filtrado[['lat', 'lon']].mean().tolist()
@@ -97,10 +96,20 @@ if st.session_state.mostrar_mapa:
                 icon=folium.Icon(color=cor_icon, icon="exclamation-sign")
             ).add_to(marker_cluster)
 
-        # 🔖 Legenda embutida no mapa
+        # ✅ Legenda embutida e responsiva
         legend_html = '''
         {% macro html(this, kwargs) %}
-        <div style="
+        <style>
+        @media only screen and (max-width: 600px) {
+            .map-legend {
+                bottom: 20px !important;
+                left: 5px !important;
+                font-size: 11px !important;
+                width: 90vw !important;
+            }
+        }
+        </style>
+        <div class="map-legend" style="
             position: absolute;
             bottom: 10px;
             left: 10px;
@@ -136,7 +145,6 @@ if st.session_state.mostrar_mapa:
         m.get_root().add_child(macro)
 
         st_folium(m, width=1000, height=600, returned_objects=[])
-
     else:
         st.warning("Nenhum dado encontrado para os filtros selecionados.")
 

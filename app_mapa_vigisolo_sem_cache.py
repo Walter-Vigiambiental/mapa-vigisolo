@@ -102,7 +102,7 @@ if st.session_state.mostrar_mapa:
                 f"<strong>Bairro:</strong> {row['BAIRRO']}<br>"
                 f"<strong>Contaminantes:</strong> {row['CONTAMINANTES']}<br>"
                 f"<strong>População Exposta:</strong> {row['POPULAÇÃO EXPOSTA']}<br>"
-                f"<strong>Data:</strong> {row['DATA'].date()}<br>"
+                f"<strong>Data:</strong> {row['DATA'].strftime('%d/%m/%Y')}<br>"
                 f"<strong>Coordenadas:</strong> {row['lat']}, {row['lon']}<br>"
                 f"<strong>Risco:</strong> {emoji_risco} {risco}"
                 f"{imagem_html}"

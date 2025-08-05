@@ -94,7 +94,7 @@ if st.session_state.mostrar_mapa:
                 cor_icon = "green"
                 emoji_risco = "🟢"
             else:
-                cor_icon = "gray"
+                cor_icon = "dark gray"
                 emoji_risco = "⚪"
 
             popup_text = (

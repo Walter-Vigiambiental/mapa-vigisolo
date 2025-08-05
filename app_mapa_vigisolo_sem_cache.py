@@ -80,7 +80,11 @@ if st.session_state.mostrar_mapa:
         marker_cluster = MarkerCluster().add_to(m)
 
         for _, row in df_filtrado.iterrows():
-            imagem_html = f'<br><img src="{row["URL_FOTO"]}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
+            imagem_html = (
+    f'<br><a href="{row["URL_FOTO"]}" target="_blank">'
+    f'<img src="{row["URL_FOTO"]}" width="250" style="cursor: pointer;"></a>'
+    if pd.notna(row.get("URL_FOTO")) else ""
+)
 
             risco = str(row.get('RISCO', 'Não informado')).strip()
             risco_lower = risco.lower()

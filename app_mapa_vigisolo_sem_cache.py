@@ -32,7 +32,7 @@ meses_nome = {
     7: "Julho", 8: "Agosto", 9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro"
 }
 bairros = sorted(df['BAIRRO'].dropna().unique())
-contaminantes = sorted(df['CONTAMINANTES'].dropna().unique())
+areas = sorted(df['DENOMINAÇÃO DA ÁREA'].dropna().unique())
 riscos = ["Todos", "🔴 Alto", "🟠 Médio", "🟢 Baixo", "⚪ Não informado"]
 
 with st.container():
@@ -44,7 +44,7 @@ with st.container():
     with col3:
         bairro_selecionado = st.selectbox("📍 Bairro", options=["Todos"] + bairros)
     with col4:
-        contaminante_selecionado = st.selectbox("☣️ Contaminante", options=["Todos"] + contaminantes)
+        area_selecionada = st.selectbox("📌 Área", options=["Todos"] + areas)
     with col5:
         risco_selecionado = st.selectbox("⚠️ Risco", options=riscos)
 
@@ -57,8 +57,8 @@ if mes_selecionado_nome != "Todos":
     df_filtrado = df_filtrado[df_filtrado['MES'] == mes_num]
 if bairro_selecionado != "Todos":
     df_filtrado = df_filtrado[df_filtrado['BAIRRO'] == bairro_selecionado]
-if contaminante_selecionado != "Todos":
-    df_filtrado = df_filtrado[df_filtrado['CONTAMINANTES'] == contaminante_selecionado]
+if area_selecionada != "Todos":
+    df_filtrado = df_filtrado[df_filtrado['DENOMINAÇÃO DA ÁREA'] == area_selecionada]
 if risco_selecionado != "Todos":
     risco_texto = risco_selecionado.split(" ", 1)[1].strip().lower()
     df_filtrado = df_filtrado[df_filtrado['RISCO'].str.lower().str.contains(risco_texto, na=False)]
@@ -69,13 +69,6 @@ if not df_filtrado.empty:
     m = folium.Map(location=map_center, zoom_start=12)
     marker_cluster = MarkerCluster().add_to(m)
 
-    areas_por_risco = {
-        "🔴 Alto": [],
-        "🟠 Médio": [],
-        "🟢 Baixo": [],
-        "⚪ Não informado": []
-    }
-
     for _, row in df_filtrado.iterrows():
         imagem_html = f'<br><img src="{row.get("URL_FOTO", "")}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
 
@@ -84,22 +77,17 @@ if not df_filtrado.empty:
         if "alto" in risco_lower:
             cor_icon = "darkred"
             emoji_risco = "🔴"
-            risco_categoria = "🔴 Alto"
         elif "médio" in risco_lower or "medio" in risco_lower:
             cor_icon = "orange"
             emoji_risco = "🟠"
-            risco_categoria = "🟠 Médio"
         elif "baixo" in risco_lower:
             cor_icon = "green"
             emoji_risco = "🟢"
-            risco_categoria = "🟢 Baixo"
         else:
             cor_icon = "darkgray"
             emoji_risco = "⚪"
-            risco_categoria = "⚪ Não informado"
 
         area_nome = row.get('DENOMINAÇÃO DA ÁREA', 'Área não informada')
-        areas_por_risco[risco_categoria].append(area_nome)
 
         popup_text = (
             f"<strong>Área:</strong> {area_nome}<br>"
@@ -121,27 +109,8 @@ if not df_filtrado.empty:
             icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
         ).add_to(marker_cluster)
 
-    # Layout ajustado: mapa e legenda
-    col_mapa, col_legenda = st.columns([4, 1])
-    with col_mapa:
-        st_folium(m, width=950, height=600, returned_objects=[])
-
-    with col_legenda:
-        st.markdown("### 🗂️ Áreas por Nível de Risco")
-        with st.expander("Mostrar/Ocultar Legenda"):
-            if risco_selecionado == "Todos":
-                for risco, areas in areas_por_risco.items():
-                    if areas:
-                        st.markdown(f"**{risco}**")
-                        for area in sorted(set(areas)):
-                            st.markdown(f"- {area}")
-            else:
-                if areas_por_risco[risco_selecionado]:
-                    st.markdown(f"**{risco_selecionado}**")
-                    for area in sorted(set(areas_por_risco[risco_selecionado])):
-                        st.markdown(f"- {area}")
-                else:
-                    st.info("Nenhuma área encontrada para esse nível de risco.")
+    st.markdown("### 🗺️ Mapa Gerado")
+    st_folium(m, width=950, height=600, returned_objects=[])
 else:
     st.warning("Nenhum dado encontrado para os filtros selecionados.")
 

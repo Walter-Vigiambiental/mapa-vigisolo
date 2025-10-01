@@ -96,18 +96,22 @@ if st.session_state.mostrar_mapa:
             if "alto" in risco_lower:
                 cor_icon = "darkred"
                 emoji_risco = "🔴"
+                risco_categoria = "🔴 Alto"
             elif "médio" in risco_lower or "medio" in risco_lower:
                 cor_icon = "orange"
                 emoji_risco = "🟠"
+                risco_categoria = "🟠 Médio"
             elif "baixo" in risco_lower:
                 cor_icon = "green"
                 emoji_risco = "🟢"
+                risco_categoria = "🟢 Baixo"
             else:
                 cor_icon = "darkgray"
                 emoji_risco = "⚪"
+                risco_categoria = "⚪ Não informado"
 
             area_nome = row.get('DENOMINAÇÃO DA ÁREA', 'Área não informada')
-            areas_por_risco[emoji_risco].append(area_nome)
+            areas_por_risco[risco_categoria].append(area_nome)
 
             popup_text = (
                 f"<strong>Área:</strong> {area_nome}<br>"

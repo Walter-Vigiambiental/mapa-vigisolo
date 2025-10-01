@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import folium
-from folium.plugins import MarkerCluster, MiniMap
+from folium.plugins import MarkerCluster
 from streamlit_folium import st_folium
 
 # Estilo visual personalizado com animação pulsante
@@ -98,9 +98,7 @@ if not df_filtrado.empty:
     m.fit_bounds([[lat_min, lon_min], [lat_max, lon_max]], padding=(0, 0))
     m.options['maxBounds'] = [[lat_min - 0.01, lon_min - 0.01], [lat_max + 0.01, lon_max + 0.01]]
 
-    MiniMap().add_to(m)
     marker_cluster = MarkerCluster().add_to(m)
-
     lista_areas_legenda = []
 
     for _, row in df_filtrado.iterrows():

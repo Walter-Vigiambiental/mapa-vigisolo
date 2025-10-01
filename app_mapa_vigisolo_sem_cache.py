@@ -22,11 +22,9 @@ st.markdown("""
 
 st.title("🗺️ Mapa Áreas Programa VigiSolo")
 
-# Estado de exibição do mapa
 if "mostrar_mapa" not in st.session_state:
     st.session_state.mostrar_mapa = False
 
-# Carregar dados
 def carregar_dados():
     df = pd.read_csv(sheet_url)
     df[['lat', 'lon']] = df['COORDENADAS'].str.split(', ', expand=True).astype(float)
@@ -141,12 +139,20 @@ if st.session_state.mostrar_mapa:
         with col_legenda:
             st.markdown("### 🗂️ Áreas por Nível de Risco")
             with st.expander("Mostrar/Ocultar Legenda"):
-                risco_opcao = st.radio("Filtrar por risco:", options=list(areas_por_risco.keys()))
-                if areas_por_risco[risco_opcao]:
-                    for area in sorted(set(areas_por_risco[risco_opcao])):
-                        st.markdown(f"- {area}")
+                risco_opcao = st.radio("Filtrar por risco:", options=["Todos"] + list(areas_por_risco.keys()))
+                if risco_opcao == "Todos":
+                    for risco, areas in areas_por_risco.items():
+                        if areas:
+                            st.markdown(f"**{risco}**")
+                            for area in sorted(set(areas)):
+                                st.markdown(f"- {area}")
                 else:
-                    st.info("Nenhuma área encontrada para esse nível de risco.")
+                    if areas_por_risco[risco_opcao]:
+                        st.markdown(f"**{risco_opcao}**")
+                        for area in sorted(set(areas_por_risco[risco_opcao])):
+                            st.markdown(f"- {area}")
+                    else:
+                        st.info("Nenhuma área encontrada para esse nível de risco.")
 
     else:
         st.warning("Nenhum dado encontrado para os filtros selecionados.")

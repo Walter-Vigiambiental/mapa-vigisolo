@@ -7,28 +7,21 @@ from streamlit_folium import st_folium
 # Estilo visual personalizado
 st.markdown("""
     <style>
-    /* Filtros e botões */
     .stSelectbox > div, .stButton > button {
         font-size: 15px;
         padding: 6px 10px;
         border-radius: 6px;
     }
-
-    /* Mapa */
     iframe {
         border-radius: 10px;
         box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
-
-    /* Legenda lateral */
     .legend-box {
         background-color: #f9f9f9;
         padding: 10px;
         border-radius: 8px;
         box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
-
-    /* Rodapé */
     footer {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
@@ -91,8 +84,9 @@ if risco_selecionado != "Todos":
 
 # Criar mapa
 if not df_filtrado.empty:
-    map_center = df_filtrado[['lat', 'lon']].mean().tolist()
-    m = folium.Map(location=map_center, zoom_start=12, tiles='CartoDB positron')
+    m = folium.Map(tiles='CartoDB positron')
+    bounds = df_filtrado[['lat', 'lon']].values.tolist()
+    m.fit_bounds(bounds)
     MiniMap().add_to(m)
     marker_cluster = MarkerCluster().add_to(m)
 

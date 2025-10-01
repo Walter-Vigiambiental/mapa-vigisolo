@@ -4,7 +4,7 @@ import folium
 from folium.plugins import MarkerCluster, MiniMap
 from streamlit_folium import st_folium
 
-# Estilo visual personalizado
+# Estilo visual personalizado com animação pulsante
 st.markdown("""
     <style>
     .stSelectbox > div, .stButton > button {
@@ -21,6 +21,14 @@ st.markdown("""
         padding: 10px;
         border-radius: 8px;
         box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    .pulse-icon {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+        100% { transform: scale(1); }
     }
     footer {visibility: hidden;}
     </style>
@@ -83,7 +91,6 @@ if risco_selecionado != "Todos":
 
 # Criar mapa
 if not df_filtrado.empty:
-    bounds = df_filtrado[['lat', 'lon']].values.tolist()
     lat_min, lat_max = df_filtrado['lat'].min(), df_filtrado['lat'].max()
     lon_min, lon_max = df_filtrado['lon'].min(), df_filtrado['lon'].max()
 
@@ -106,7 +113,7 @@ if not df_filtrado.empty:
         elif risco == "baixo":
             cor_icon = "green"; emoji_risco = "🟢"
         else:
-            cor_icon = "darkgray"; emoji_risco = "⚪"
+            cor_icon = "gray"; emoji_risco = "⚪"
 
         area_nome = row.get('DENOMINAÇÃO DA ÁREA', 'Área não informada')
         lista_areas_legenda.append(area_nome)
@@ -128,7 +135,11 @@ if not df_filtrado.empty:
         folium.Marker(
             location=[row['lat'], row['lon']],
             popup=popup,
-            icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
+            icon=folium.DivIcon(html=f"""
+                <div class='pulse-icon' style="font-size:24px; color:{cor_icon};">
+                    {emoji_risco}
+                </div>
+            """)
         ).add_to(marker_cluster)
 
     # Layout: mapa e legenda lateral
@@ -156,5 +167,4 @@ st.markdown(
     "<div style='margin-top: -10px; text-align: center; font-size: 14px; color: gray;'>"
     "Desenvolvido por Walter Alves usando Streamlit."
     "</div>",
-    unsafe_allow_html=True
-)
+    unsafe_allow

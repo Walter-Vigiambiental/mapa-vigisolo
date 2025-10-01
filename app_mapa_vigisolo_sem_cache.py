@@ -12,7 +12,8 @@ st.set_page_config(page_title="Mapa VigiSolo", layout="wide")
 
 st.title("🗺️ Mapa Áreas Programa VigiSolo")
 
-@st.cache_data
+# Atualiza os dados a cada 5 minutos
+@st.cache_data(ttl=300)
 def carregar_dados():
     df = pd.read_csv(sheet_url)
     df[['lat', 'lon']] = df['COORDENADAS'].str.split(', ', expand=True).astype(float)

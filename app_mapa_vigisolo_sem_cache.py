@@ -24,7 +24,7 @@ def carregar_dados():
 df = carregar_dados()
 
 # Filtros
-st.markdown("### Filtros")
+st.markdown("### 🎛️ Filtros")
 anos = sorted(df['ANO'].dropna().unique())
 meses_numeros = sorted(df['MES'].dropna().unique())
 meses_nome = {
@@ -35,17 +35,18 @@ bairros = sorted(df['BAIRRO'].dropna().unique())
 contaminantes = sorted(df['CONTAMINANTES'].dropna().unique())
 riscos = ["Todos", "🔴 Alto", "🟠 Médio", "🟢 Baixo", "⚪ Não informado"]
 
-col1, col2, col3, col4, col5 = st.columns([0.8, 0.8, 1, 1, 0.8])
-with col1:
-    ano_selecionado = st.selectbox("Ano", options=["Todos"] + list(anos))
-with col2:
-    mes_selecionado_nome = st.selectbox("Mês", options=["Todos"] + [meses_nome[m] for m in meses_numeros])
-with col3:
-    bairro_selecionado = st.selectbox("Bairro", options=["Todos"] + bairros)
-with col4:
-    contaminante_selecionado = st.selectbox("Contaminante", options=["Todos"] + contaminantes)
-with col5:
-    risco_selecionado = st.selectbox("Risco", options=riscos)
+with st.container():
+    col1, col2, col3, col4, col5 = st.columns([1, 1, 1.2, 1.2, 1])
+    with col1:
+        ano_selecionado = st.selectbox("📅 Ano", options=["Todos"] + list(anos))
+    with col2:
+        mes_selecionado_nome = st.selectbox("🗓️ Mês", options=["Todos"] + [meses_nome[m] for m in meses_numeros])
+    with col3:
+        bairro_selecionado = st.selectbox("📍 Bairro", options=["Todos"] + bairros)
+    with col4:
+        contaminante_selecionado = st.selectbox("☣️ Contaminante", options=["Todos"] + contaminantes)
+    with col5:
+        risco_selecionado = st.selectbox("⚠️ Risco", options=riscos)
 
 # Aplicar filtros
 df_filtrado = df.copy()

@@ -106,7 +106,7 @@ if st.session_state.mostrar_mapa:
                 cor_icon = "darkgray"
                 emoji_risco = "⚪"
 
-            areas_por_risco[f"{emoji_risco} {risco.title()}"].append(row['DENOMINAÇÃO DA ÁREA'])
+            areas_por_risco[emoji_risco + " " + risco.title()].append(row['DENOMINAÇÃO DA ÁREA'])
 
             popup_text = (
                 f"<strong>Área:</strong> {row['DENOMINAÇÃO DA ÁREA']}<br>"
@@ -128,39 +128,14 @@ if st.session_state.mostrar_mapa:
                 icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
             ).add_to(marker_cluster)
 
-        # Legenda de risco
-        legenda_risco_html = """
+        # Legenda lateral direita com áreas por cor
+        legenda_html = """
         <div style="
             position: fixed;
-            bottom: 50px;
-            left: 50px;
-            width: 180px;
-            height: 140px;
-            background-color: white;
-            border:2px solid grey;
-            z-index:9999;
-            font-size:14px;
-            padding: 10px;
-        ">
-        <b>Legenda - Nível de Risco</b><br>
-        🔴 Alto<br>
-        🟠 Médio<br>
-        🟢 Baixo<br>
-        ⚪ Não informado
-        </div>
-        """
-        legenda_risco = MacroElement()
-        legenda_risco._template = Template(legenda_risco_html)
-        m.get_root().add_child(legenda_risco)
-
-        # Legenda de áreas por risco
-        legenda_areas_html = """
-        <div style="
-            position: fixed;
-            bottom: 50px;
-            right: 50px;
+            top: 100px;
+            right: 30px;
             width: 300px;
-            max-height: 300px;
+            max-height: 500px;
             overflow-y: auto;
             background-color: white;
             border:2px solid grey;
@@ -172,14 +147,14 @@ if st.session_state.mostrar_mapa:
         """
         for risco, areas in areas_por_risco.items():
             if areas:
-                legenda_areas_html += f"<br>{risco}<br>"
+                legenda_html += f"<br>{risco}<br>"
                 for area in sorted(set(areas)):
-                    legenda_areas_html += f"- {area}<br>"
-        legenda_areas_html += "</div>"
+                    legenda_html += f"- {area}<br>"
+        legenda_html += "</div>"
 
-        legenda_areas = MacroElement()
-        legenda_areas._template = Template(legenda_areas_html)
-        m.get_root().add_child(legenda_areas)
+        legenda = MacroElement()
+        legenda._template = Template(legenda_html)
+        m.get_root().add_child(legenda)
 
         st_folium(m, width=1000, height=600, returned_objects=[])
     else:

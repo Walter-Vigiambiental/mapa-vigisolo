@@ -3,6 +3,7 @@ import pandas as pd
 import folium
 from folium.plugins import MarkerCluster
 from streamlit_folium import st_folium
+from branca.element import Template, MacroElement
 
 # URL da planilha pública (CSV)
 sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0tNytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv"
@@ -94,7 +95,7 @@ if st.session_state.mostrar_mapa:
                 cor_icon = "green"
                 emoji_risco = "🟢"
             else:
-                cor_icon = "dark gray"
+                cor_icon = "darkgray"
                 emoji_risco = "⚪"
 
             popup_text = (
@@ -116,6 +117,31 @@ if st.session_state.mostrar_mapa:
                 popup=popup,
                 icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
             ).add_to(marker_cluster)
+
+        # Adicionar legenda
+        legenda_html = """
+        <div style="
+            position: fixed;
+            bottom: 50px;
+            left: 50px;
+            width: 180px;
+            height: 140px;
+            background-color: white;
+            border:2px solid grey;
+            z-index:9999;
+            font-size:14px;
+            padding: 10px;
+        ">
+        <b>Legenda - Nível de Risco</b><br>
+        🔴 Alto<br>
+        🟠 Médio<br>
+        🟢 Baixo<br>
+        ⚪ Não informado
+        </div>
+        """
+        legenda = MacroElement()
+        legenda._template = Template(legenda_html)
+        m.get_root().add_child(legenda)
 
         st_folium(m, width=1000, height=600, returned_objects=[])
     else:

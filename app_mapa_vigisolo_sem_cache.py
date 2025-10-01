@@ -69,6 +69,8 @@ if not df_filtrado.empty:
     m = folium.Map(location=map_center, zoom_start=12)
     marker_cluster = MarkerCluster().add_to(m)
 
+    lista_areas_legenda = []
+
     for _, row in df_filtrado.iterrows():
         imagem_html = f'<br><img src="{row.get("URL_FOTO", "")}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
 
@@ -88,6 +90,7 @@ if not df_filtrado.empty:
             emoji_risco = "⚪"
 
         area_nome = row.get('DENOMINAÇÃO DA ÁREA', 'Área não informada')
+        lista_areas_legenda.append(area_nome)
 
         popup_text = (
             f"<strong>Área:</strong> {area_nome}<br>"
@@ -109,8 +112,19 @@ if not df_filtrado.empty:
             icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
         ).add_to(marker_cluster)
 
-    st.markdown("### 🗺️ Mapa Gerado")
-    st_folium(m, width=950, height=600, returned_objects=[])
+    # Layout: mapa e legenda lateral
+    col_mapa, col_legenda = st.columns([4, 1])
+    with col_mapa:
+        st.markdown("### 🗺️ Mapa Gerado")
+        st_folium(m, width=950, height=600, returned_objects=[])
+
+    with col_legenda:
+        st.markdown("### 📋 Áreas Filtradas")
+        if lista_areas_legenda:
+            for area in sorted(set(lista_areas_legenda)):
+                st.markdown(f"- {area}")
+        else:
+            st.info("Nenhuma área encontrada para o risco selecionado.")
 else:
     st.warning("Nenhum dado encontrado para os filtros selecionados.")
 

@@ -7,28 +7,21 @@ from streamlit_folium import st_folium
 # Estilo visual personalizado
 st.markdown("""
     <style>
-    /* Filtros e botões */
     .stSelectbox > div, .stButton > button {
         font-size: 15px;
         padding: 6px 10px;
         border-radius: 6px;
     }
-
-    /* Mapa */
     iframe {
         border-radius: 10px;
         box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
-
-    /* Legenda lateral */
     .legend-box {
         background-color: #f9f9f9;
         padding: 10px;
         border-radius: 8px;
         box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
-
-    /* Rodapé */
     footer {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
@@ -37,10 +30,9 @@ st.markdown("""
 st.set_page_config(page_title="Mapa VigiSolo", layout="wide")
 st.title("🗺️ Mapa Áreas Programa VigiSolo")
 
-# Atualiza os dados a cada 5 minutos
 @st.cache_data(ttl=300)
 def carregar_dados():
-    df = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0tNytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv")
+    df = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0NytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv")
     df[['lat', 'lon']] = df['COORDENADAS'].str.split(', ', expand=True).astype(float)
     df['DATA'] = pd.to_datetime(df['DATA'], errors='coerce', dayfirst=True)
     df['ANO'] = df['DATA'].dt.year
@@ -102,13 +94,13 @@ if not df_filtrado.empty:
         imagem_html = f'<br><img src="{row.get("URL_FOTO", "")}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
         risco = str(row.get('RISCO', 'Não informado')).strip().lower()
         if risco == "alto":
-            cor_icon = "darkred"; emoji_risco = "🔴"
+            cor_icon = "red"; emoji_risco = "🔴"; icon_name = "exclamation"
         elif risco in ["médio", "medio"]:
-            cor_icon = "orange"; emoji_risco = "🟠"
+            cor_icon = "orange"; emoji_risco = "🟠"; icon_name = "adjust"
         elif risco == "baixo":
-            cor_icon = "green"; emoji_risco = "🟢"
+            cor_icon = "green"; emoji_risco = "🟢"; icon_name = "check"
         else:
-            cor_icon = "darkgray"; emoji_risco = "⚪"
+            cor_icon = "gray"; emoji_risco = "⚪"; icon_name = "question"
 
         area_nome = row.get('DENOMINAÇÃO DA ÁREA', 'Área não informada')
         lista_areas_legenda.append(area_nome)
@@ -130,7 +122,7 @@ if not df_filtrado.empty:
         folium.Marker(
             location=[row['lat'], row['lon']],
             popup=popup,
-            icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
+            icon=folium.Icon(color=cor_icon, icon=icon_name, prefix='fa', spin=True),
         ).add_to(marker_cluster)
 
     # Layout: mapa e legenda lateral

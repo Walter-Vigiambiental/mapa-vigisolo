@@ -168,3 +168,5 @@ st.markdown(
     "Desenvolvido por Walter Alves usando Streamlit."
     "</div>",
     unsafe_allow
+
+)

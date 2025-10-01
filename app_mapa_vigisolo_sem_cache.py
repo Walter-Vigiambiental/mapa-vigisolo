@@ -89,7 +89,7 @@ if st.session_state.mostrar_mapa:
         }
 
         for _, row in df_filtrado.iterrows():
-            imagem_html = f'<br><img src="{row["URL_FOTO"]}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
+            imagem_html = f'<br><img src="{row.get("URL_FOTO", "")}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
 
             risco = str(row.get('RISCO', 'Não informado')).strip()
             risco_lower = risco.lower()
@@ -106,15 +106,16 @@ if st.session_state.mostrar_mapa:
                 cor_icon = "darkgray"
                 emoji_risco = "⚪"
 
-            areas_por_risco[emoji_risco].append(row['DENOMINAÇÃO DA ÁREA'])
+            area_nome = row.get('DENOMINAÇÃO DA ÁREA', 'Área não informada')
+            areas_por_risco[emoji_risco].append(area_nome)
 
             popup_text = (
-                f"<strong>Área:</strong> {row['DENOMINAÇÃO DA ÁREA']}<br>"
-                f"<strong>Bairro:</strong> {row['BAIRRO']}<br>"
-                f"<strong>Contaminantes:</strong> {row['CONTAMINANTES']}<br>"
-                f"<strong>População Exposta:</strong> {row['POPULAÇÃO EXPOSTA']}<br>"
-                f"<strong>Data:</strong> {row['DATA'].strftime('%d/%m/%Y')}<br>"
-                f"<strong>Coordenadas:</strong> {row['lat']}, {row['lon']}<br>"
+                f"<strong>Área:</strong> {area_nome}<br>"
+                f"<strong>Bairro:</strong> {row.get('BAIRRO', '')}<br>"
+                f"<strong>Contaminantes:</strong> {row.get('CONTAMINANTES', '')}<br>"
+                f"<strong>População Exposta:</strong> {row.get('POPULAÇÃO EXPOSTA', '')}<br>"
+                f"<strong>Data:</strong> {row.get('DATA').strftime('%d/%m/%Y') if pd.notna(row.get('DATA')) else 'Data não informada'}<br>"
+                f"<strong>Coordenadas:</strong> {row.get('lat')}, {row.get('lon')}<br>"
                 f"<strong>Risco:</strong> {emoji_risco} {risco}"
                 f"{imagem_html}"
             )

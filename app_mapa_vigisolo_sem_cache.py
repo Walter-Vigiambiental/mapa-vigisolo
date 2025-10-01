@@ -119,12 +119,13 @@ if not df_filtrado.empty:
         st_folium(m, width=950, height=600, returned_objects=[])
 
     with col_legenda:
-        st.markdown("### 📋 Áreas Filtradas")
-        if lista_areas_legenda:
-            for area in sorted(set(lista_areas_legenda)):
-                st.markdown(f"- {area}")
-        else:
-            st.info("Nenhuma área encontrada para o risco selecionado.")
+        legenda_expande = False if risco_selecionado == "Todos" else True
+        with st.expander("📋 Áreas Filtradas", expanded=legenda_expande):
+            if lista_areas_legenda:
+                for area in sorted(set(lista_areas_legenda)):
+                    st.markdown(f"- {area}")
+            else:
+                st.info("Nenhuma área encontrada para o risco selecionado.")
 else:
     st.warning("Nenhum dado encontrado para os filtros selecionados.")
 

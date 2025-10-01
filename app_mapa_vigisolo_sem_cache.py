@@ -3,7 +3,6 @@ import pandas as pd
 import folium
 from folium.plugins import MarkerCluster
 from streamlit_folium import st_folium
-from branca.element import Template, MacroElement
 
 # URL da planilha pública (CSV)
 sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0tNytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv"
@@ -11,20 +10,10 @@ sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyE
 # Configuração da página
 st.set_page_config(page_title="Mapa VigiSolo", layout="wide")
 
-# Reduzir espaço inferior
-st.markdown("""
-    <style>
-        .main .block-container {
-            padding-bottom: 0rem;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
 st.title("🗺️ Mapa Áreas Programa VigiSolo")
 
-if "mostrar_mapa" not in st.session_state:
-    st.session_state.mostrar_mapa = False
-
+# Carregar dados
+@st.cache_data
 def carregar_dados():
     df = pd.read_csv(sheet_url)
     df[['lat', 'lon']] = df['COORDENADAS'].str.split(', ', expand=True).astype(float)
@@ -35,7 +24,7 @@ def carregar_dados():
 
 df = carregar_dados()
 
-# Filtros
+# Filtros principais
 st.markdown("### Filtros")
 anos = sorted(df['ANO'].dropna().unique())
 meses_numeros = sorted(df['MES'].dropna().unique())
@@ -45,8 +34,9 @@ meses_nome = {
 }
 bairros = sorted(df['BAIRRO'].dropna().unique())
 contaminantes = sorted(df['CONTAMINANTES'].dropna().unique())
+riscos = ["Todos", "🔴 Alto", "🟠 Médio", "🟢 Baixo", "⚪ Não informado"]
 
-col1, col2, col3, col4 = st.columns([1, 1, 1.2, 1.2])
+col1, col2, col3, col4, col5 = st.columns([1, 1, 1.2, 1.2, 1])
 with col1:
     ano_selecionado = st.selectbox("Ano", options=["Todos"] + list(anos))
 with col2:
@@ -55,9 +45,8 @@ with col3:
     bairro_selecionado = st.selectbox("Bairro", options=["Todos"] + bairros)
 with col4:
     contaminante_selecionado = st.selectbox("Contaminante", options=["Todos"] + contaminantes)
-
-if st.button("Gerar Mapa"):
-    st.session_state.mostrar_mapa = True
+with col5:
+    risco_selecionado = st.selectbox("Risco", options=riscos)
 
 # Aplicar filtros
 df_filtrado = df.copy()
@@ -70,94 +59,93 @@ if bairro_selecionado != "Todos":
     df_filtrado = df_filtrado[df_filtrado['BAIRRO'] == bairro_selecionado]
 if contaminante_selecionado != "Todos":
     df_filtrado = df_filtrado[df_filtrado['CONTAMINANTES'] == contaminante_selecionado]
+if risco_selecionado != "Todos":
+    risco_texto = risco_selecionado.split(" ", 1)[1].strip().lower()
+    df_filtrado = df_filtrado[df_filtrado['RISCO'].str.lower().str.contains(risco_texto, na=False)]
 
 # Criar mapa
-if st.session_state.mostrar_mapa:
-    if not df_filtrado.empty:
-        map_center = df_filtrado[['lat', 'lon']].mean().tolist()
-        m = folium.Map(location=map_center, zoom_start=12)
-        marker_cluster = MarkerCluster().add_to(m)
+if not df_filtrado.empty:
+    map_center = df_filtrado[['lat', 'lon']].mean().tolist()
+    m = folium.Map(location=map_center, zoom_start=12)
+    marker_cluster = MarkerCluster().add_to(m)
 
-        # Agrupar áreas por risco
-        areas_por_risco = {
-            "🔴 Alto": [],
-            "🟠 Médio": [],
-            "🟢 Baixo": [],
-            "⚪ Não informado": []
-        }
+    areas_por_risco = {
+        "🔴 Alto": [],
+        "🟠 Médio": [],
+        "🟢 Baixo": [],
+        "⚪ Não informado": []
+    }
 
-        for _, row in df_filtrado.iterrows():
-            imagem_html = f'<br><img src="{row.get("URL_FOTO", "")}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
+    for _, row in df_filtrado.iterrows():
+        imagem_html = f'<br><img src="{row.get("URL_FOTO", "")}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
 
-            risco = str(row.get('RISCO', 'Não informado')).strip()
-            risco_lower = risco.lower()
-            if "alto" in risco_lower:
-                cor_icon = "darkred"
-                emoji_risco = "🔴"
-                risco_categoria = "🔴 Alto"
-            elif "médio" in risco_lower or "medio" in risco_lower:
-                cor_icon = "orange"
-                emoji_risco = "🟠"
-                risco_categoria = "🟠 Médio"
-            elif "baixo" in risco_lower:
-                cor_icon = "green"
-                emoji_risco = "🟢"
-                risco_categoria = "🟢 Baixo"
-            else:
-                cor_icon = "darkgray"
-                emoji_risco = "⚪"
-                risco_categoria = "⚪ Não informado"
+        risco = str(row.get('RISCO', 'Não informado')).strip()
+        risco_lower = risco.lower()
+        if "alto" in risco_lower:
+            cor_icon = "darkred"
+            emoji_risco = "🔴"
+            risco_categoria = "🔴 Alto"
+        elif "médio" in risco_lower or "medio" in risco_lower:
+            cor_icon = "orange"
+            emoji_risco = "🟠"
+            risco_categoria = "🟠 Médio"
+        elif "baixo" in risco_lower:
+            cor_icon = "green"
+            emoji_risco = "🟢"
+            risco_categoria = "🟢 Baixo"
+        else:
+            cor_icon = "darkgray"
+            emoji_risco = "⚪"
+            risco_categoria = "⚪ Não informado"
 
-            area_nome = row.get('DENOMINAÇÃO DA ÁREA', 'Área não informada')
-            areas_por_risco[risco_categoria].append(area_nome)
+        area_nome = row.get('DENOMINAÇÃO DA ÁREA', 'Área não informada')
+        areas_por_risco[risco_categoria].append(area_nome)
 
-            popup_text = (
-                f"<strong>Área:</strong> {area_nome}<br>"
-                f"<strong>Bairro:</strong> {row.get('BAIRRO', '')}<br>"
-                f"<strong>Contaminantes:</strong> {row.get('CONTAMINANTES', '')}<br>"
-                f"<strong>População Exposta:</strong> {row.get('POPULAÇÃO EXPOSTA', '')}<br>"
-                f"<strong>Data:</strong> {row.get('DATA').strftime('%d/%m/%Y') if pd.notna(row.get('DATA')) else 'Data não informada'}<br>"
-                f"<strong>Coordenadas:</strong> {row.get('lat')}, {row.get('lon')}<br>"
-                f"<strong>Risco:</strong> {emoji_risco} {risco}"
-                f"{imagem_html}"
-            )
+        popup_text = (
+            f"<strong>Área:</strong> {area_nome}<br>"
+            f"<strong>Bairro:</strong> {row.get('BAIRRO', '')}<br>"
+            f"<strong>Contaminantes:</strong> {row.get('CONTAMINANTES', '')}<br>"
+            f"<strong>População Exposta:</strong> {row.get('POPULAÇÃO EXPOSTA', '')}<br>"
+            f"<strong>Data:</strong> {row.get('DATA').strftime('%d/%m/%Y') if pd.notna(row.get('DATA')) else 'Data não informada'}<br>"
+            f"<strong>Coordenadas:</strong> {row.get('lat')}, {row.get('lon')}<br>"
+            f"<strong>Risco:</strong> {emoji_risco} {risco}"
+            f"{imagem_html}"
+        )
 
-            iframe = folium.IFrame(html=popup_text, width=300, height=320)
-            popup = folium.Popup(iframe, max_width=300)
+        iframe = folium.IFrame(html=popup_text, width=300, height=320)
+        popup = folium.Popup(iframe, max_width=300)
 
-            folium.Marker(
-                location=[row['lat'], row['lon']],
-                popup=popup,
-                icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
-            ).add_to(marker_cluster)
+        folium.Marker(
+            location=[row['lat'], row['lon']],
+            popup=popup,
+            icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
+        ).add_to(marker_cluster)
 
-        # Exibir mapa e legenda lado a lado
-        col_mapa, col_legenda = st.columns([3, 1])
-        with col_mapa:
-            st_folium(m, width=900, height=600, returned_objects=[])
+    # Exibir mapa e legenda lado a lado
+    col_mapa, col_legenda = st.columns([3, 1])
+    with col_mapa:
+        st_folium(m, width=900, height=600, returned_objects=[])
 
-        with col_legenda:
-            st.markdown("### 🗂️ Áreas por Nível de Risco")
-            with st.expander("Mostrar/Ocultar Legenda"):
-                risco_opcao = st.radio("Filtrar por risco:", options=["Todos"] + list(areas_por_risco.keys()))
-                if risco_opcao == "Todos":
-                    for risco, areas in areas_por_risco.items():
-                        if areas:
-                            st.markdown(f"**{risco}**")
-                            for area in sorted(set(areas)):
-                                st.markdown(f"- {area}")
-                else:
-                    if areas_por_risco[risco_opcao]:
-                        st.markdown(f"**{risco_opcao}**")
-                        for area in sorted(set(areas_por_risco[risco_opcao])):
+    with col_legenda:
+        st.markdown("### 🗂️ Áreas por Nível de Risco")
+        with st.expander("Mostrar/Ocultar Legenda"):
+            if risco_selecionado == "Todos":
+                for risco, areas in areas_por_risco.items():
+                    if areas:
+                        st.markdown(f"**{risco}**")
+                        for area in sorted(set(areas)):
                             st.markdown(f"- {area}")
-                    else:
-                        st.info("Nenhuma área encontrada para esse nível de risco.")
+            else:
+                if areas_por_risco[risco_selecionado]:
+                    st.markdown(f"**{risco_selecionado}**")
+                    for area in sorted(set(areas_por_risco[risco_selecionado])):
+                        st.markdown(f"- {area}")
+                else:
+                    st.info("Nenhuma área encontrada para esse nível de risco.")
+else:
+    st.warning("Nenhum dado encontrado para os filtros selecionados.")
 
-    else:
-        st.warning("Nenhum dado encontrado para os filtros selecionados.")
-
-# Rodapé enxuto
+# Rodapé
 st.markdown(
     "<div style='margin-top: -10px; text-align: center; font-size: 14px; color: gray;'>"
     "Desenvolvido por Walter Alves usando Streamlit."

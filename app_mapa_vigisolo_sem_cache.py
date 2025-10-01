@@ -30,7 +30,6 @@ st.markdown("""
 st.set_page_config(page_title="Mapa VigiSolo", layout="wide")
 st.title("🗺️ Mapa Áreas Programa VigiSolo")
 
-# Atualiza os dados a cada 5 minutos
 @st.cache_data(ttl=300)
 def carregar_dados():
     df = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0tNytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv")
@@ -89,7 +88,7 @@ if not df_filtrado.empty:
     lon_min, lon_max = df_filtrado['lon'].min(), df_filtrado['lon'].max()
 
     m = folium.Map(tiles='CartoDB positron')
-    m.fit_bounds([[lat_min, lon_min], [lat_max, lon_max]], padding=(10, 10))
+    m.fit_bounds([[lat_min, lon_min], [lat_max, lon_max]], padding=(0, 0))
     m.options['maxBounds'] = [[lat_min - 0.01, lon_min - 0.01], [lat_max + 0.01, lon_max + 0.01]]
 
     MiniMap().add_to(m)
@@ -137,7 +136,7 @@ if not df_filtrado.empty:
     with col_mapa:
         st.markdown("### 🗺️ Mapa Gerado")
         st.divider()
-        st_folium(m, width=700, height=600, returned_objects=[])
+        st_folium(m, width="100%", height=600, returned_objects=[])
 
     with col_legenda:
         legenda_expande = False if risco_selecionado == "Todos" else True

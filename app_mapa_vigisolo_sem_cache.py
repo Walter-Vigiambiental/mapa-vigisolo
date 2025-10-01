@@ -96,7 +96,6 @@ if not df_filtrado.empty:
 
     m = folium.Map(tiles='CartoDB positron')
     m.fit_bounds([[lat_min, lon_min], [lat_max, lon_max]], padding=(0, 0))
-    m.options['maxBounds'] = [[lat_min - 0.01, lon_min - 0.01], [lat_max + 0.01, lon_max + 0.01]]
 
     marker_cluster = MarkerCluster().add_to(m)
     lista_areas_legenda = []

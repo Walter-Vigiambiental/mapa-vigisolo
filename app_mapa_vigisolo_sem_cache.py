@@ -32,12 +32,17 @@ st.title("🗺️ Mapa Áreas Programa VigiSolo")
 
 @st.cache_data(ttl=300)
 def carregar_dados():
-    df = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0NytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv")
-    df[['lat', 'lon']] = df['COORDENADAS'].str.split(', ', expand=True).astype(float)
-    df['DATA'] = pd.to_datetime(df['DATA'], errors='coerce', dayfirst=True)
-    df['ANO'] = df['DATA'].dt.year
-    df['MES'] = df['DATA'].dt.month
-    return df
+    try:
+        url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0NytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv"
+        df = pd.read_csv(url)
+        df[['lat', 'lon']] = df['COORDENADAS'].str.split(', ', expand=True).astype(float)
+        df['DATA'] = pd.to_datetime(df['DATA'], errors='coerce', dayfirst=True)
+        df['ANO'] = df['DATA'].dt.year
+        df['MES'] = df['DATA'].dt.month
+        return df
+    except Exception:
+        st.error("Erro ao carregar os dados da planilha. Verifique se o link está publicado como CSV.")
+        st.stop()
 
 df = carregar_dados()
 

@@ -1,21 +1,46 @@
 import streamlit as st
 import pandas as pd
 import folium
-from folium.plugins import MarkerCluster
+from folium.plugins import MarkerCluster, MiniMap
 from streamlit_folium import st_folium
 
-# URL da planilha pública (CSV)
-sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0tNytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv"
+# Estilo visual personalizado
+st.markdown("""
+    <style>
+    /* Filtros e botões */
+    .stSelectbox > div, .stButton > button {
+        font-size: 15px;
+        padding: 6px 10px;
+        border-radius: 6px;
+    }
+
+    /* Mapa */
+    iframe {
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    /* Legenda lateral */
+    .legend-box {
+        background-color: #f9f9f9;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+
+    /* Rodapé */
+    footer {visibility: hidden;}
+    </style>
+""", unsafe_allow_html=True)
 
 # Configuração da página
 st.set_page_config(page_title="Mapa VigiSolo", layout="wide")
-
 st.title("🗺️ Mapa Áreas Programa VigiSolo")
 
 # Atualiza os dados a cada 5 minutos
 @st.cache_data(ttl=300)
 def carregar_dados():
-    df = pd.read_csv(sheet_url)
+    df = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vR4rNqe1-YHIaKxLgyEbhN0tNytQixaNJnVfcyI0PN6ajT0KXzIGlh_dBrWFs6R9QqCEJ_UTGp3KOmL/pub?gid=317759421&single=true&output=csv")
     df[['lat', 'lon']] = df['COORDENADAS'].str.split(', ', expand=True).astype(float)
     df['DATA'] = pd.to_datetime(df['DATA'], errors='coerce', dayfirst=True)
     df['ANO'] = df['DATA'].dt.year
@@ -28,10 +53,10 @@ df = carregar_dados()
 st.markdown("### 🎛️ Filtros")
 anos = sorted(df['ANO'].dropna().unique())
 meses_numeros = sorted(df['MES'].dropna().unique())
-meses_nome = {
-    1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril", 5: "Maio", 6: "Junho",
-    7: "Julho", 8: "Agosto", 9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro"
-}
+meses_nome = {i: nome for i, nome in enumerate([
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+], start=1)}
 bairros = sorted(df['BAIRRO'].dropna().unique())
 areas = sorted(df['DENOMINAÇÃO DA ÁREA'].dropna().unique())
 riscos = ["Todos", "🔴 Alto", "🟠 Médio", "🟢 Baixo", "⚪ Não informado"]
@@ -39,15 +64,15 @@ riscos = ["Todos", "🔴 Alto", "🟠 Médio", "🟢 Baixo", "⚪ Não informado
 with st.container():
     col1, col2, col3, col4, col5 = st.columns([1, 1, 1.2, 1.2, 1])
     with col1:
-        ano_selecionado = st.selectbox("📅 Ano", options=["Todos"] + list(anos))
+        ano_selecionado = st.selectbox("📅 Ano", ["Todos"] + list(anos))
     with col2:
-        mes_selecionado_nome = st.selectbox("🗓️ Mês", options=["Todos"] + [meses_nome[m] for m in meses_numeros])
+        mes_selecionado_nome = st.selectbox("🗓️ Mês", ["Todos"] + [meses_nome[m] for m in meses_numeros])
     with col3:
-        bairro_selecionado = st.selectbox("📍 Bairro", options=["Todos"] + bairros)
+        bairro_selecionado = st.selectbox("📍 Bairro", ["Todos"] + bairros)
     with col4:
-        area_selecionada = st.selectbox("📌 Área", options=["Todos"] + areas)
+        area_selecionada = st.selectbox("📌 Área", ["Todos"] + areas)
     with col5:
-        risco_selecionado = st.selectbox("⚠️ Risco", options=riscos)
+        risco_selecionado = st.selectbox("⚠️ Risco", riscos)
 
 # Aplicar filtros
 df_filtrado = df.copy()
@@ -67,27 +92,23 @@ if risco_selecionado != "Todos":
 # Criar mapa
 if not df_filtrado.empty:
     map_center = df_filtrado[['lat', 'lon']].mean().tolist()
-    m = folium.Map(location=map_center, zoom_start=12)
+    m = folium.Map(location=map_center, zoom_start=12, tiles='CartoDB positron')
+    MiniMap().add_to(m)
     marker_cluster = MarkerCluster().add_to(m)
 
     lista_areas_legenda = []
 
     for _, row in df_filtrado.iterrows():
         imagem_html = f'<br><img src="{row.get("URL_FOTO", "")}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
-
         risco = str(row.get('RISCO', 'Não informado')).strip().lower()
         if risco == "alto":
-            cor_icon = "darkred"
-            emoji_risco = "🔴"
+            cor_icon = "darkred"; emoji_risco = "🔴"
         elif risco in ["médio", "medio"]:
-            cor_icon = "orange"
-            emoji_risco = "🟠"
+            cor_icon = "orange"; emoji_risco = "🟠"
         elif risco == "baixo":
-            cor_icon = "green"
-            emoji_risco = "🟢"
+            cor_icon = "green"; emoji_risco = "🟢"
         else:
-            cor_icon = "darkgray"
-            emoji_risco = "⚪"
+            cor_icon = "darkgray"; emoji_risco = "⚪"
 
         area_nome = row.get('DENOMINAÇÃO DA ÁREA', 'Área não informada')
         lista_areas_legenda.append(area_nome)
@@ -116,16 +137,19 @@ if not df_filtrado.empty:
     col_mapa, col_legenda = st.columns([4, 1])
     with col_mapa:
         st.markdown("### 🗺️ Mapa Gerado")
+        st.divider()
         st_folium(m, width=950, height=600, returned_objects=[])
 
     with col_legenda:
         legenda_expande = False if risco_selecionado == "Todos" else True
         with st.expander("📋 Áreas Filtradas", expanded=legenda_expande):
+            st.markdown('<div class="legend-box">', unsafe_allow_html=True)
             if lista_areas_legenda:
                 for area in sorted(set(lista_areas_legenda)):
-                    st.markdown(f"- {area}")
+                    st.markdown(f"✅ {area}")
             else:
                 st.info("Nenhuma área encontrada para o risco selecionado.")
+            st.markdown('</div>', unsafe_allow_html=True)
 else:
     st.warning("Nenhum dado encontrado para os filtros selecionados.")
 

@@ -167,6 +167,5 @@ st.markdown(
     "<div style='margin-top: -10px; text-align: center; font-size: 14px; color: gray;'>"
     "Desenvolvido por Walter Alves usando Streamlit."
     "</div>",
-    unsafe_allow
-
+    unsafe_allow_html=True
 )

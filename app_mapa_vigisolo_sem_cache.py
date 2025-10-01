@@ -61,7 +61,7 @@ if area_selecionada != "Todos":
     df_filtrado = df_filtrado[df_filtrado['DENOMINAÇÃO DA ÁREA'] == area_selecionada]
 if risco_selecionado != "Todos":
     risco_texto = risco_selecionado.split(" ", 1)[1].strip().lower()
-    df_filtrado = df_filtrado[df_filtrado['RISCO'].str.lower().str.contains(risco_texto, na=False)]
+    df_filtrado = df_filtrado[df_filtrado['RISCO'].str.lower().str.fullmatch(risco_texto, na=False)]
 
 # Criar mapa
 if not df_filtrado.empty:
@@ -74,15 +74,14 @@ if not df_filtrado.empty:
     for _, row in df_filtrado.iterrows():
         imagem_html = f'<br><img src="{row.get("URL_FOTO", "")}" width="250">' if pd.notna(row.get("URL_FOTO")) else ""
 
-        risco = str(row.get('RISCO', 'Não informado')).strip()
-        risco_lower = risco.lower()
-        if "alto" in risco_lower:
+        risco = str(row.get('RISCO', 'Não informado')).strip().lower()
+        if risco == "alto":
             cor_icon = "darkred"
             emoji_risco = "🔴"
-        elif "médio" in risco_lower or "medio" in risco_lower:
+        elif risco in ["médio", "medio"]:
             cor_icon = "orange"
             emoji_risco = "🟠"
-        elif "baixo" in risco_lower:
+        elif risco == "baixo":
             cor_icon = "green"
             emoji_risco = "🟢"
         else:
@@ -99,7 +98,7 @@ if not df_filtrado.empty:
             f"<strong>População Exposta:</strong> {row.get('POPULAÇÃO EXPOSTA', '')}<br>"
             f"<strong>Data:</strong> {row.get('DATA').strftime('%d/%m/%Y') if pd.notna(row.get('DATA')) else 'Data não informada'}<br>"
             f"<strong>Coordenadas:</strong> {row.get('lat')}, {row.get('lon')}<br>"
-            f"<strong>Risco:</strong> {emoji_risco} {risco}"
+            f"<strong>Risco:</strong> {emoji_risco} {risco.capitalize()}"
             f"{imagem_html}"
         )
 

@@ -12,7 +12,6 @@ st.set_page_config(page_title="Mapa VigiSolo", layout="wide")
 
 st.title("🗺️ Mapa Áreas Programa VigiSolo")
 
-# Carregar dados
 @st.cache_data
 def carregar_dados():
     df = pd.read_csv(sheet_url)
@@ -24,7 +23,7 @@ def carregar_dados():
 
 df = carregar_dados()
 
-# Filtros principais
+# Filtros
 st.markdown("### Filtros")
 anos = sorted(df['ANO'].dropna().unique())
 meses_numeros = sorted(df['MES'].dropna().unique())
@@ -121,10 +120,10 @@ if not df_filtrado.empty:
             icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
         ).add_to(marker_cluster)
 
-    # Exibir mapa e legenda lado a lado
-    col_mapa, col_legenda = st.columns([3, 1])
+    # Ajuste de layout: legenda mais próxima do mapa
+    col_mapa, col_legenda = st.columns([4, 1])
     with col_mapa:
-        st_folium(m, width=900, height=600, returned_objects=[])
+        st_folium(m, width=950, height=600, returned_objects=[])
 
     with col_legenda:
         st.markdown("### 🗂️ Áreas por Nível de Risco")

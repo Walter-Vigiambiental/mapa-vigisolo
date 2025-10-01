@@ -42,7 +42,7 @@ def carregar_dados():
 df = carregar_dados()
 
 # Filtros
-st.markdown("### 🎛️ Filtros")
+st.markdown("### Filtros")
 anos = sorted(df['ANO'].dropna().unique())
 meses_numeros = sorted(df['MES'].dropna().unique())
 meses_nome = {i: nome for i, nome in enumerate([

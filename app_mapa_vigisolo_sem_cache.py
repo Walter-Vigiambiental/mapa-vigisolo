@@ -35,7 +35,7 @@ bairros = sorted(df['BAIRRO'].dropna().unique())
 contaminantes = sorted(df['CONTAMINANTES'].dropna().unique())
 riscos = ["Todos", "🔴 Alto", "🟠 Médio", "🟢 Baixo", "⚪ Não informado"]
 
-col1, col2, col3, col4, col5 = st.columns([1, 1, 1.2, 1.2, 1])
+col1, col2, col3, col4, col5 = st.columns([0.8, 0.8, 1, 1, 0.8])
 with col1:
     ano_selecionado = st.selectbox("Ano", options=["Todos"] + list(anos))
 with col2:
@@ -120,7 +120,7 @@ if not df_filtrado.empty:
             icon=folium.Icon(color=cor_icon, icon="exclamation-sign"),
         ).add_to(marker_cluster)
 
-    # Ajuste de layout: legenda mais próxima do mapa
+    # Layout ajustado: mapa e legenda
     col_mapa, col_legenda = st.columns([4, 1])
     with col_mapa:
         st_folium(m, width=950, height=600, returned_objects=[])

@@ -140,11 +140,13 @@ if st.session_state.mostrar_mapa:
 
         with col_legenda:
             st.markdown("### 🗂️ Áreas por Nível de Risco")
-            for risco, areas in areas_por_risco.items():
-                if areas:
-                    st.markdown(f"**{risco}**")
-                    for area in sorted(set(areas)):
+            with st.expander("Mostrar/Ocultar Legenda"):
+                risco_opcao = st.radio("Filtrar por risco:", options=list(areas_por_risco.keys()))
+                if areas_por_risco[risco_opcao]:
+                    for area in sorted(set(areas_por_risco[risco_opcao])):
                         st.markdown(f"- {area}")
+                else:
+                    st.info("Nenhuma área encontrada para esse nível de risco.")
 
     else:
         st.warning("Nenhum dado encontrado para os filtros selecionados.")

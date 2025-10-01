@@ -3,6 +3,7 @@ import pandas as pd
 import folium
 from folium.plugins import MarkerCluster, MiniMap
 from streamlit_folium import st_folium
+from geopy.distance import geodesic
 
 # Estilo visual personalizado
 st.markdown("""
@@ -84,9 +85,17 @@ if risco_selecionado != "Todos":
 
 # Criar mapa
 if not df_filtrado.empty:
-    m = folium.Map(tiles='CartoDB positron')
     bounds = df_filtrado[['lat', 'lon']].values.tolist()
-    m.fit_bounds(bounds)
+
+    # Se houver mais de um ponto, usar fit_bounds
+    if len(bounds) > 1:
+        m = folium.Map(tiles='CartoDB positron')
+        m.fit_bounds(bounds, padding=(10, 10))
+    else:
+        # Apenas um ponto: usar zoom fixo
+        map_center = df_filtrado[['lat', 'lon']].mean().tolist()
+        m = folium.Map(location=map_center, zoom_start=15, tiles='CartoDB positron')
+
     MiniMap().add_to(m)
     marker_cluster = MarkerCluster().add_to(m)
 
